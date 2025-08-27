@@ -1,0 +1,120 @@
+@use "../variables" as *;
+@use "../breakpoints" as *;
+@use "sass:color";
+
+.projects {
+    padding: 5rem 0;
+    background-color: $color-light;
+    color: $color-dark;
+
+    .container {
+        max-width: $max-width;
+        margin: 0 auto;
+        padding: 0 $gutter;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2.5rem;
+    }
+
+    /* Fix Masonry spacing */
+    .masonry-grid {
+        display: flex;
+
+        width: auto;
+        gap: 5em;
+    }
+
+    .masonry-grid_column {
+        padding: 0rem 2.5rem;
+        background-clip: padding-box;
+
+        /* Chaque item dans la colonne a une marge basse */
+        > * {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .projects__loading,
+    .projects__error {
+        text-align: center;
+        padding: 2rem;
+        font-size: 1.2rem;
+    }
+
+    .project-card {
+        background-color: #fff;
+        border: 1px solid color.adjust($color-dark, $lightness: 70%);
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+    }
+
+    .add-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #ccc;
+        background-color: #f9f9f9;
+        padding: 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 280px;
+        text-align: center;
+
+        .plus {
+            font-size: 3rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        &:hover {
+            background-color: #eee;
+            border-color: #999;
+            transform: scale(1.02);
+        }
+    }
+
+    @include respond-until($breakpoint-md) {
+        padding: 3rem 1rem;
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .masonry-grid {
+            margin-left: -1rem;
+        }
+
+        .masonry-grid_column {
+            padding-left: 1rem;
+
+            > * {
+                margin-bottom: 1rem;
+            }
+        }
+    }
+}

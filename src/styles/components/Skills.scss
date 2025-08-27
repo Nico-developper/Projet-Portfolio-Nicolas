@@ -1,0 +1,48 @@
+@use "../_variables" as *;
+@use "../_breakpoints" as *;
+@use "sass:color";
+
+.skills {
+    --card-bg: var(--surface, #fff);
+    --card-border: rgba(0, 0, 0, 0.08);
+    --heading: 1.15rem;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+
+    .skills__group {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .skills__title {
+        font-size: var(--heading);
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .skills__list {
+        display: grid;
+        gap: 0.25rem;
+
+        &--stars {
+            /* on desktop, 2 columns */
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+        }
+
+        &--bars {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .skills .skills__list--stars {
+        grid-template-columns: 1fr;
+    }
+}

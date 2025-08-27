@@ -1,0 +1,19 @@
+@use "./_variables" as *;
+@use "./_breakpoints" as *;
+@use "sass:color";
+
+button,
+input,
+textarea {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+button {
+    background: $color-primary;
+    color: #fff;
+    transition: background 0.2s;
+    &:hover {
+        background: color.adjust($color-primary, $lightness: -8%);
+    }
+}

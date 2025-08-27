@@ -1,0 +1,125 @@
+@use "../variables" as *;
+@use "../breakpoints" as *;
+@use "sass:color";
+
+.home-page {
+    margin-top: 3em;
+}
+
+.home-page .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    padding: 4rem $gutter;
+}
+
+/* Colonne texte */
+.home__content {
+    max-width: 620px;
+
+    h1 {
+        margin: 0 0 1rem;
+        font-size: clamp(2rem, 4.2vw, 3rem);
+        line-height: 1.12;
+        font-weight: 700;
+        color: $color-primary;
+        letter-spacing: 0.2px;
+    }
+
+    h2 {
+        margin: 0 0 1.25rem;
+        font-size: clamp(1.1rem, 2vw, 1.5rem);
+        font-weight: 600;
+        color: color.adjust($color-primary, $lightness: -8%);
+    }
+
+    p {
+        margin: 0 0 1.5rem;
+        line-height: 1.7;
+        color: #616161;
+    }
+}
+
+/* Boutons */
+.home__cta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.2rem;
+    text-decoration: none;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease,
+        border-color 0.15s ease, transform 0.06s ease;
+
+    &:active {
+        transform: translateY(1px);
+    }
+    &:focus-visible {
+        outline: 2px solid $color-primary;
+        outline-offset: 2px;
+    }
+}
+
+.btn-primary {
+    background: $color-primary;
+    color: #fff;
+    border-color: $color-primary;
+
+    &:hover {
+        background: color.adjust($color-primary, $lightness: -10%);
+        border-color: color.adjust($color-primary, $lightness: -10%);
+    }
+}
+
+.btn-secondary {
+    background: #fff;
+    border: 2px solid $color-primary;
+    color: $color-primary;
+
+    &:hover {
+        background: color.adjust($color-primary, $lightness: 45%);
+        border-color: color.adjust($color-primary, $lightness: 25%);
+        color: color.adjust($color-primary, $lightness: -5%);
+    }
+}
+
+/* Colonne image */
+.home__img {
+    flex: 0 0 auto;
+
+    img {
+        display: block;
+        width: min(340px, 38vw);
+        height: auto;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08),
+            0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* Responsive */
+@include respond-until($breakpoint-md) {
+    .home-page .hero {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .home__img {
+        order: -1;
+        img {
+            width: min(75vw, 360px);
+        }
+    }
+}

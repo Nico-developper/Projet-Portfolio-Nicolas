@@ -1,0 +1,21 @@
+@use "sass:color";
+
+$color-primary: #303dac;
+$color-dark: #111;
+$color-light: #f9f9f9;
+$color-accent: #ff6b6b;
+
+$max-width: 1200px;
+$gutter: 1.5rem;
+
+:root {
+    --surface: #fff;
+    --text: #111;
+    --accent: #3b82f6;
+}
+
+.skills,
+.rating-stars,
+.progress-row {
+    color: var(--accent);
+}

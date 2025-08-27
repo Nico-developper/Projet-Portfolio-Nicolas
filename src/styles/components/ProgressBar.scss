@@ -1,0 +1,48 @@
+@use "../_variables" as *; // optional if present
+@use "../_breakpoints" as *;
+@use "sass:color";
+
+.progress-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(160px, 1fr) auto;
+    align-items: center;
+    gap: 0.8rem 1rem;
+    padding: 0.5rem 0;
+
+    .progress-label {
+        font-weight: 600;
+    }
+
+    .progress {
+        position: relative;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+
+        &__bar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(
+                90deg,
+                currentColor,
+                rgba(0, 0, 0, 0.85)
+            );
+            animation: grow 0.8s ease forwards;
+        }
+    }
+
+    .progress-value {
+        width: 3.5ch;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        opacity: 0.75;
+    }
+}
+
+@keyframes grow {
+    from {
+        width: 0;
+    }
+}
