@@ -1,120 +1,116 @@
-@use "../_variables" as *;
-@use "../_breakpoints" as *;
-@use "sass:color";
-
-/* Hauteur globale du header, utilisée partout */
-:root {
-    --header-height: 72px;
-} /* ajuste 64/72/80 selon ton design */
+@use '../variables' as *;
+@use '../breakpoints' as *;
+@use 'sass:color';
 
 .header {
-    background-color: rgba($color: #a1a0f7, $alpha: 1);
-    color: $color-dark;
-    /* on remplace le padding vertical par une hauteur fixe */
-    height: var(--header-height);
-    padding: 0; /* <— important, la hauteur est gérée par .container */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
+  background-color: $color-background;
+  color: var(--surface);
+  /* on remplace le padding vertical par une hauteur fixe */
+  height: var(--header-height);
+  padding: 0; /* <— important, la hauteur est gérée par .container */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 
-    .container {
-        max-width: $max-width;
-        margin: 0 auto;
-        padding: 0 $gutter;
-        height: 100%; /* centre verticalement le contenu */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+  .container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $gutter;
+    height: 100%; /* centre verticalement le contenu */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--secondary);
+  }
+
+  .nav {
+    ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
     }
-
-    .logo {
-        font-size: 1.5rem;
-        font-weight: bold;
+    a {
+      color: var(--surface);
+      text-decoration: none;
+      font-weight: 500;
+      &:hover {
+        color: var(--accent);
+      }
     }
+  }
 
+  .logout-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    transition: color 0.2s;
+    &:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+  }
+
+  .burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 150;
+    span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: var(--primary);
+      transition: 0.3s;
+    }
+    &.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    &.active span:nth-child(2) {
+      opacity: 0;
+    }
+    &.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+  }
+
+  @include respond-until($breakpoint-md) {
     .nav {
-        ul {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-        a {
-            color: $color-dark;
-            text-decoration: none;
-            font-weight: 500;
-            &:hover {
-                color: $color-accent;
-            }
-        }
-    }
-
-    .logout-btn {
-        background: none;
-        border: none;
-        color: $color-dark;
-        cursor: pointer;
-        font: inherit;
-        padding: 0;
-        transition: color 0.2s;
-        &:hover {
-            color: $color-primary;
-            text-decoration: underline;
-        }
-    }
-
-    .burger {
-        display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: var(--surface);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      ul {
         flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        z-index: 150;
-        span {
-            display: block;
-            width: 25px;
-            height: 3px;
-            background: $color-dark;
-            transition: 0.3s;
-        }
-        &.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-        &.active span:nth-child(2) {
-            opacity: 0;
-        }
-        &.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(5px, -5px);
-        }
+        gap: 1.5rem;
+      }
+      &.open {
+        display: flex;
+      }
     }
-
-    @include respond-until($breakpoint-md) {
-        .nav {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background-color: $color-light;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            ul {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-            &.open {
-                display: flex;
-            }
-        }
-        .burger {
-            display: flex;
-        }
+    .burger {
+      display: flex;
     }
+  }
 }

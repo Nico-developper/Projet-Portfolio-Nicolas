@@ -1,13 +1,13 @@
-@use "./_variables" as *;
-@use "./_breakpoints" as *;
-@use "sass:color";
+@use '../styles/variables' as *;
+@use '../styles/breakpoints' as *;
+@use 'sass:color';
 
 .container {
-    width: 100%;
-    max-width: $max-width;
-    margin-inline: auto;
-    padding-inline: $gutter;
+  width: 100%;
+  max-width: $max-width;
+  margin-inline: auto;
+  padding-inline: $gutter;
 }
 section {
-    padding: 2rem 0;
+  padding: 2rem 0;
 }

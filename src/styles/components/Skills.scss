@@ -1,48 +1,62 @@
-@use "../_variables" as *;
-@use "../_breakpoints" as *;
-@use "sass:color";
+@use '../variables' as *;
+@use '../breakpoints' as *;
 
-.skills {
-    --card-bg: var(--surface, #fff);
-    --card-border: rgba(0, 0, 0, 0.08);
-    --heading: 1.15rem;
-
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 1.5rem;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-
-    .skills__group {
-        display: grid;
-        gap: 1rem;
-    }
-
-    .skills__title {
-        font-size: var(--heading);
-        line-height: 1.2;
-        margin: 0;
-    }
-
-    .skills__list {
-        display: grid;
-        gap: 0.25rem;
-
-        &--stars {
-            /* on desktop, 2 columns */
-            grid-template-columns: repeat(2, minmax(260px, 1fr));
-        }
-
-        &--bars {
-            grid-template-columns: 1fr;
-        }
-    }
+.skills .skills__title {
+  margin-top: 48px;
+  margin-bottom: 16px;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--secondary);
 }
 
-@media (max-width: 768px) {
-    .skills .skills__list--stars {
-        grid-template-columns: 1fr;
-    }
+.skills__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include respond-from($breakpoint-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @include respond-from($breakpoint-lg) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.skills__card {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+/* Cartes “étoiles” — on s’assure que le bloc étoiles prend toute la largeur */
+.skills__card--stars .rating-stars {
+  width: 100%;
+}
+
+/* Nom/label de la compétence en bleu clair (et gras) */
+.skills__name {
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+/* Meta éventuelle */
+.skills__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skills__desc {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Sécurité : titre de section en bleu clair */
+.skills .skills__title {
+  color: var(--secondary);
 }

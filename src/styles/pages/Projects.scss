@@ -1,120 +1,122 @@
-@use "../variables" as *;
-@use "../breakpoints" as *;
-@use "sass:color";
+@use '../variables' as *;
+@use '../breakpoints' as *;
 
 .projects {
-    padding: 5rem 0;
-    background-color: $color-light;
-    color: $color-dark;
+  padding: 5rem 0;
+  background: var(--bg); /* fond sombre comme Home/Contact */
+  color: var(--text);
 
-    .container {
-        max-width: $max-width;
-        margin: 0 auto;
-        padding: 0 $gutter;
+  .container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  h2,
+  h1 {
+    margin: 0 0 0.75rem;
+    color: var(--secondary); /* titres bleu clair */
+    font-weight: 800;
+  }
+
+  .projects__error {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Filtres (si utilisés) — style identique aux CTA Home */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1rem 0 1.25rem;
+
+    button {
+      background: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: 999px;
+      padding: 0.55rem 0.95rem;
+      font-weight: 600;
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+
+      &:hover,
+      &.active {
+        background: var(--primary);
+        color: #fff;
+      }
+    }
+  }
+
+  /* Grille simple (si tu n’utilises pas Masonry) */
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+
+    @include respond-from($breakpoint-md) {
+      grid-template-columns: 1fr 1fr;
+    }
+    @include respond-from($breakpoint-lg) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+
+  /* Masonry helpers (utilisés dans ton Projects.jsx) */
+  .masonry-grid {
+    display: flex;
+    margin-left: -1rem; /* gutter compensation */
+    width: auto;
+    gap: 3em;
+  }
+  .masonry-grid_column {
+    padding-left: 1rem; /* gutter */
+    background-clip: padding-box;
+
+    > * {
+      margin-bottom: 3rem;
+    }
+  }
+
+  /* Carte d’ajout (+) visible si connecté */
+  .add-card {
+    background: #fff;
+    color: var(--ink);
+    border: 2px dashed color-mix(in srgb, var(--primary) 35%, transparent);
+    border-radius: 16px;
+    min-height: 200px;
+    display: grid;
+    place-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.2s ease;
+
+    span {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 600;
     }
 
-    h1 {
-        text-align: center;
-        margin-bottom: 3rem;
-        font-size: 2.5rem;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-e2);
+      border-color: var(--primary);
     }
-
-    /* Fix Masonry spacing */
-    .masonry-grid {
-        display: flex;
-
-        width: auto;
-        gap: 5em;
-    }
-
-    .masonry-grid_column {
-        padding: 0rem 2.5rem;
-        background-clip: padding-box;
-
-        /* Chaque item dans la colonne a une marge basse */
-        > * {
-            margin-bottom: 1.5rem;
-        }
-    }
-
-    .projects__loading,
-    .projects__error {
-        text-align: center;
-        padding: 2rem;
-        font-size: 1.2rem;
-    }
-
-    .project-card {
-        background-color: #fff;
-        border: 1px solid color.adjust($color-dark, $lightness: 70%);
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        cursor: pointer;
-        transition: transform 0.2s ease;
-
-        &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        h3 {
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-    }
-
-    .add-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border: 2px dashed #ccc;
-        background-color: #f9f9f9;
-        padding: 2rem;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-height: 280px;
-        text-align: center;
-
-        .plus {
-            font-size: 3rem;
-            color: #666;
-            margin-bottom: 1rem;
-        }
-
-        p {
-            font-size: 1.1rem;
-            color: #555;
-        }
-
-        &:hover {
-            background-color: #eee;
-            border-color: #999;
-            transform: scale(1.02);
-        }
-    }
-
-    @include respond-until($breakpoint-md) {
-        padding: 3rem 1rem;
-
-        h1 {
-            font-size: 2rem;
-        }
-
-        .masonry-grid {
-            margin-left: -1rem;
-        }
-
-        .masonry-grid_column {
-            padding-left: 1rem;
-
-            > * {
-                margin-bottom: 1rem;
-            }
-        }
-    }
+  }
 }

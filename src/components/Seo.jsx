@@ -1,28 +1,28 @@
-import { Helmet } from "react-helmet-async";
+import { Helmet } from 'react-helmet-async';
 
 export default function Seo({
-    title = "Portfolio – Nicolas",
-    description = "Développeur web – projets, compétences et contact.",
-    image = "/cover.jpg",
-    url = "https://exemple.com",
+  title = 'Portfolio – Nicolas',
+  description = 'Développeur web – projets, compétences et contact.',
+  image = '/cover.jpg',
+  url = 'https://exemple.com',
 }) {
-    return (
-        <Helmet>
-            <title>{title}</title>
-            <meta name='description' content={description} />
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
 
-            {/* OpenGraph */}
-            <meta property='og:type' content='website' />
-            <meta property='og:title' content={title} />
-            <meta property='og:description' content={description} />
-            <meta property='og:image' content={image} />
-            <meta property='og:url' content={url} />
+      {/* OpenGraph */}
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
+      <meta property="og:url" content={url} />
 
-            {/* Twitter */}
-            <meta name='twitter:card' content='summary_large_image' />
-            <meta name='twitter:title' content={title} />
-            <meta name='twitter:description' content={description} />
-            <meta name='twitter:image' content={image} />
-        </Helmet>
-    );
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+    </Helmet>
+  );
 }

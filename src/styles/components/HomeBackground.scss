@@ -1,108 +1,84 @@
-/* src/styles/components/HomeBackground.scss */
-@use "../variables" as *;
-@use "../breakpoints" as *;
-@use "sass:color";
+@use '../variables' as *;
+@use '../breakpoints' as *;
 
-/* Le conteneur parent (.home) doit être positionné en relative (voir plus bas). */
+/* Background FX — ultra-lightweight & static */
 .homefx {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 
-/* Mesh gradient animé (CSS only) */
-.homefx__mesh {
-    position: absolute;
-    inset: -20%;
-    filter: blur(32px);
-    opacity: 0.65;
-    background: radial-gradient(
-            35% 40% at 20% 20%,
-            rgba(69, 27, 218, 0.45),
-            transparent 60%
-        ),
-        radial-gradient(
-            35% 40% at 80% 30%,
-            rgba(62, 82, 150, 0.35),
-            transparent 60%
-        ),
-        radial-gradient(
-            30% 36% at 50% 80%,
-            rgba(107, 142, 255, 0.3),
-            transparent 60%
-        );
-    animation: meshShift 28s ease-in-out infinite alternate;
-}
-
-@keyframes meshShift {
-    0% {
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-        transform: translate3d(2%, -2%, 0) scale(1.03);
-    }
-    100% {
-        transform: translate3d(-1%, 1%, 0) scale(1.02);
-    }
-}
-
-/* Grid subtile */
-.homefx__grid {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(
-            to right,
-            rgba(0, 0, 0, 0.06) 1px,
-            transparent 1px
-        ),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-    mask-image: radial-gradient(
-        closest-side,
-        rgba(0, 0, 0, 0.5),
-        transparent 70%
+  /* Fond très subtil qui ne concurrence pas le contenu */
+  background:
+    radial-gradient(
+      900px 650px at 20% 10%,
+      color-mix(in srgb, var(--primary) 12%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 700px at 80% 0%,
+      color-mix(in srgb, var(--primary) 8%, transparent) 0%,
+      transparent 65%
     );
-    opacity: 0.25;
 }
 
-/* Blobs lumineux */
-.homefx__blobs .blob {
-    position: absolute;
-    width: clamp(180px, 20vw, 320px);
-    height: clamp(180px, 20vw, 320px);
-    border-radius: 50%;
-    filter: blur(45px);
-    mix-blend-mode: screen;
-    opacity: 0.45;
+/* Calque pour les blobs */
+.homefx__layer {
+  position: absolute;
+  inset: 0;
 }
 
+/* BLOBS — même couleur, taille réduite, pas d’animations */
+$blob-size: 220px; /* taille desktop par défaut */
+$blob-blur: 36px;
+
+.blob {
+  position: absolute;
+  width: $blob-size;
+  height: $blob-size;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 55%, var(--secondary) 0%, transparent 70%);
+  filter: blur($blob-blur);
+  opacity: 0.28;
+  transform: translate3d(0, 0, 0); /* propre calque GPU */
+}
+
+/* Positions fixes (aucun mouvement) */
 .blob--a {
-    top: 10%;
-    left: 8%;
-    background: rgba(41, 94, 240, 0.6);
+  top: 10%;
+  left: 12%;
 }
 .blob--b {
-    right: 10%;
-    bottom: 8%;
-    background: rgba(95, 85, 236, 0.5);
+  top: 55%;
+  left: 72%;
+}
+.blob--c {
+  top: 78%;
+  left: 28%;
 }
 
-/* Particules “dev” */
-.homefx__particles .token {
-    position: absolute;
-    font-size: clamp(10px, 1.5vw, 14px);
-    color: rgba(0, 0, 0, 0.35);
-    font-weight: 600;
-    letter-spacing: 0.2px;
+/* Responsive avec tes mixins */
+@include respond-until($breakpoint-md) {
+  .blob {
+    width: 200px;
+    height: 200px;
+    filter: blur(32px);
+    opacity: 0.25;
+  }
+}
+@include respond-until($breakpoint-sm) {
+  .blob {
+    width: 160px;
+    height: 160px;
+    filter: blur(28px);
+    opacity: 0.22;
+  }
 }
 
-/* Respecte les préférences d’accessibilité */
+/* Accessibilité : pas d’animation par design */
 @media (prefers-reduced-motion: reduce) {
-    .homefx__mesh,
-    .homefx__blobs .blob,
-    .homefx__particles .token {
-        animation: none !important;
-    }
+  .blob {
+    /* rien à désactiver */
+  }
 }

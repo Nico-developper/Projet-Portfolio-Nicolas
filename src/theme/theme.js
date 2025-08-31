@@ -1,11 +1,24 @@
-import { createTheme } from "@mui/material";
+import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
-    palette: {
-        mode: "light",
-        primary: { main: "#3b82f6" }, // bleu
+  palette: {
+    mode: 'dark',
+    primary: { main: 'var(--primary)' },
+    secondary: { main: 'var(--secondary)' },
+    error: { main: 'var(--danger)' },
+    success: { main: 'var(--success)' },
+    warning: { main: 'var(--warning)' },
+    background: {
+      default: 'var(--bg)',
+      paper: 'var(--surface)',
     },
-    typography: {
-        fontFamily: ["Inter", "system-ui", "Arial", "sans-serif"].join(","),
+    text: {
+      primary: 'var(--text)',
+      secondary: 'var(--muted)',
     },
+  },
+  shape: { borderRadius: 12 },
+  typography: {
+    fontFamily: ['Inter', 'system-ui', 'Arial', 'sans-serif'].join(','),
+  },
 });

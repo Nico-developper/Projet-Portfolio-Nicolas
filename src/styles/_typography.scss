@@ -1,12 +1,20 @@
-@use "./_variables" as *;
-@use "./_breakpoints" as *;
-@use "sass:color";
+@use '../styles/variables' as *;
+@use '../styles/variables' as *;
+@use 'sass:color';
 
 body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu,
-        "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    line-height: 1.6;
-    color: $color-dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Ubuntu,
+    'Helvetica Neue',
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
+  line-height: 1.6;
+  color: var(--surface);
 }
 h1,
 h2,
@@ -14,30 +22,30 @@ h3,
 h4,
 h5,
 h6 {
-    font-weight: 700;
-    color: $color-dark;
-    line-height: 1.2;
-    margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--secondary);
+  line-height: 1.2;
+  margin-bottom: 1rem;
 }
 h1 {
-    font-size: 2rem;
+  font-size: 2rem;
 }
 h2 {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 h3 {
-    font-size: 1.25rem;
+  font-size: 1.25rem;
 }
 h4 {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 h5 {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 h6 {
-    font-size: 0.5rem;
+  font-size: 0.5rem;
 }
 p {
-    font-size: 1rem;
-    margin-bottom: 1rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
 }

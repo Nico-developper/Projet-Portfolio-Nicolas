@@ -1,46 +1,53 @@
-@use "../_variables" as *;
-@use "../_breakpoints" as *;
-@use "sass:color";
+@use '../variables' as *;
+@use '../breakpoints' as *;
 
 .footer {
-    background-color: $color-light;
-    color: $color-dark;
-    width: 100%;
-    padding: 2rem 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    position: relative;
+  background: color-mix(in srgb, var(--bg) 86%, #000);
+  color: color-mix(in srgb, var(--text) 90%, transparent);
+  padding: 32px 0;
+  border-top: 1px solid var(--border);
 
-    .container {
-        max-width: $max-width;
-        margin: 0 auto;
-        padding: 0 $gutter;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        text-align: center;
+  .container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: 0 $gutter;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    a {
+      opacity: 0.9;
+
+      &:hover {
+        color: var(--accent);
+        opacity: 1;
+      }
     }
+  }
 
+  @include respond-until($breakpoint-sm) {
     .footer-links {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-
-        a {
-            color: $color-dark;
-            text-decoration: none;
-            font-weight: 500;
-
-            &:hover {
-                color: $color-accent;
-            }
-        }
+      flex-direction: column;
     }
+  }
+}
 
-    @include respond-until($breakpoint-sm) {
-        .footer-links {
-            flex-direction: column;
-        }
-    }
+/* === Nico color edits === */
+.footer .container {
+  text-align: center;
+}
+.footer .footer-links {
+  justify-content: center;
 }

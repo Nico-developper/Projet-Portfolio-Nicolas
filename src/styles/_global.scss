@@ -1,28 +1,34 @@
-@use "./_variables" as *;
-@use "./_breakpoints" as *;
-@use "sass:color";
+@use '../styles/variables' as *;
+@use '../styles/breakpoints' as *;
+@use 'sass:color';
 
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 body {
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    background: $color-light;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: $color-background;
 }
 img {
-    max-width: 100%;
-    height: auto;
-    display: block;
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 a {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 button {
-    font-family: inherit;
-    cursor: pointer;
+  font-family: inherit;
+  cursor: pointer;
+}
+header,
+main,
+footer {
+  position: relative;
+  z-index: 1;
 }

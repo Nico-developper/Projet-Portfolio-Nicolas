@@ -1,0 +1,88 @@
+@use '../variables' as *;
+@use '../breakpoints' as *;
+
+/* Section */
+.skills {
+  margin-top: 32px;
+}
+
+.skills__title {
+  margin-top: 48px;
+  margin-bottom: 16px;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--secondary);
+}
+
+.skills__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  /* 2 colonnes en ≥ md */
+  @include respond-from($breakpoint-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* 3 colonnes en ≥ lg */
+  @include respond-from($breakpoint-lg) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.skills__card {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.skills__name {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.skills__meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skills__progress {
+  flex: 1 1 auto;
+  height: 8px;
+  background: color-mix(in srgb, var(--primary) 12%, #fff);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.skills__progress-bar {
+  height: 100%;
+  display: block;
+  background: var(--primary);
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+.skills__percent {
+  min-width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Nico color edits === */
+/* Titres des cartes Langages en bleu clair */
+.skills .skills__name {
+  color: var(--secondary);
+  font-weight: 700;
+}
+/* Pourcentages en gras et en rose */
+.skills .skills__percent {
+  font-weight: 700;
+  color: var(--primary);
+}

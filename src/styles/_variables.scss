@@ -1,21 +1,65 @@
-@use "sass:color";
-
-$color-primary: #303dac;
-$color-dark: #111;
-$color-light: #f9f9f9;
-$color-accent: #ff6b6b;
-
-$max-width: 1200px;
-$gutter: 1.5rem;
-
+/* Design tokens — palette unique et sémantique */
 :root {
-    --surface: #fff;
-    --text: #111;
-    --accent: #3b82f6;
+  /* Palette de marque */
+  --primary: #131f8a;
+  --secondary: #60c7f0;
+  --accent: #ff6b6b;
+
+  /* Surfaces & fonds */
+  --bg: #080d3b; /* fond principal dark */
+  --surface: #ffffff; /* cartes / sections claires */
+  --surface-2: #f7f7fb; /* surface alternative (gris très clair) */
+
+  /* Texte */
+  --text: #ffffff; /* texte sur fond sombre */
+  --ink: #111111; /* texte sur surfaces claires */
+  --muted: #666666; /* texte secondaire */
+  --muted-2: #999999; /* texte tertiaire */
+
+  /* Bordures, ombres, overlays */
+  --border: color-mix(in srgb, var(--ink) 12%, transparent);
+  --border-strong: color-mix(in srgb, var(--ink) 18%, transparent);
+  --overlay: color-mix(in srgb, var(--ink) 50%, transparent);
+
+  /* États (si besoin) */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Ombres (échelles prêtes à l’emploi) */
+  --shadow-e1: 0 1px 2px color-mix(in srgb, #000 16%, transparent);
+  --shadow-e2: 0 4px 16px color-mix(in srgb, #000 18%, transparent);
+  --shadow-e3: 0 10px 30px color-mix(in srgb, #000 22%, transparent);
+
+  /* Layout */
+  --header-height: 72px;
+  --container-max: 1200px;
+  --gutter: 1.5rem;
 }
 
+/* Alias Sass pour usage SCSS (optionnels) */
+$color-primary: var(--primary);
+$color-secondary: var(--secondary);
+$color-accent: var(--accent);
+
+$color-background: var(--bg);
+$color-surface: var(--surface);
+$color-surface-2: var(--surface-2);
+
+$color-text: var(--text);
+$color-ink: var(--ink);
+$color-muted: var(--muted);
+
+$border: var(--border);
+$border-strong: var(--border-strong);
+$overlay: var(--overlay);
+
+$max-width: var(--container-max);
+$gutter: var(--gutter);
+
+/* Couleur par défaut de certains modules */
 .skills,
 .rating-stars,
 .progress-row {
-    color: var(--accent);
+  color: var(--accent);
 }

@@ -1,11 +1,11 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
-import "./../src/config/db.js";
-import Project from "./../src/models/Project.js";
-import fs from "fs";
+import './../src/config/db.js';
+import Project from './../src/models/Project.js';
+import fs from 'fs';
 
-const file = new URL("../seeds/projects.json", import.meta.url);
-const raw = fs.readFileSync(file, "utf-8");
+const file = new URL('../seeds/projects.json', import.meta.url);
+const raw = fs.readFileSync(file, 'utf-8');
 const data = JSON.parse(raw);
 
 (async () => {
@@ -15,7 +15,7 @@ const data = JSON.parse(raw);
     console.log(`✅ ${data.length} projets importés`);
     process.exit(0);
   } catch (e) {
-    console.error("❌ Seed échoué:", e.message);
+    console.error('❌ Seed échoué:', e.message);
     process.exit(1);
   }
 })();
