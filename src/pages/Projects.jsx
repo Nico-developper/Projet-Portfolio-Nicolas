@@ -50,6 +50,13 @@ export default function Projects() {
     setSelectedProject(null);
   };
 
+  const handleUpdateProject = (updated) => {
+    setItems((prev) =>
+      prev.map((p) => (p._id === updated._id || p.slug === updated.slug ? updated : p)),
+    );
+    setSelectedProject(updated);
+  };
+
   const handleAddClick = () => setShowAddModal(true);
   const handleAddProject = (newProject) => {
     if (newProject && newProject._id) {
@@ -98,6 +105,7 @@ export default function Projects() {
               onNext={handleNext}
               onPrev={handlePrev}
               onDelete={handleDeleteProject}
+              onUpdate={handleUpdateProject}
             />
           )}
         </AnimatePresence>

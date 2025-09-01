@@ -1,34 +1,44 @@
-const API_BASE = import.meta.env.PROD
-  ? import.meta.env.VITE_API_URL?.replace(/\/+$/, '') || ''
-  : '';
-// In dev: API_BASE = "" -> use Vite proxy => fetch('/api/...')
-// In prod: API_BASE = 'http://localhost:4000' (via .env.production) -> fetch('http://localhost:4000/api/...')
-const API = API_BASE ? `${API_BASE}/api` : '/api';
+// src/services/projectsService.js
+import { API } from '@/services/api';
+
+function normalizeTech(value) {
+  if (Array.isArray(value)) return value;
+  return String(value || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
 
 export async function fetchProjects(params = {}) {
   const url = new URL(`${API}/projects`, window.location.origin);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
   });
-  const res = await fetch(url, { credentials: 'include' });
+
+  // ⬅️ pas de credentials (cookies non utilisés)
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Erreur API ${res.status}`);
+
   const raw = await res.json();
   return raw.map((p) => ({
     _id: p._id,
-    slug: p.slug,
     title: p.title,
+    slug: p.slug,
     description: p.description,
+    order: p.order,
+    featured: p.featured,
     coverImage: p.coverImage,
-    tech: p.tech,
+    tech: normalizeTech(p.tech),
     githubUrl: p.githubUrl,
     demoUrl: p.demoUrl,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
   }));
 }
 
 export async function fetchProject(slug) {
-  const res = await fetch(`${API}/projects/${encodeURIComponent(slug)}`, {
-    credentials: 'include',
-  });
+  const res = await fetch(`${API}/projects/${encodeURIComponent(slug)}`);
   if (!res.ok) throw new Error('Projet introuvable');
-  return res.json();
+  const p = await res.json();
+  return { ...p, tech: normalizeTech(p.tech) };
 }

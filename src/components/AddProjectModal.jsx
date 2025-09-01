@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { getToken } from '@/services/authService';
+import { API, authHeader } from '@/services/api';
 import '../styles/components/AddProjectModal.scss';
 
 export default function AddProjectModal({ onClose, onAdd }) {
@@ -16,12 +17,12 @@ export default function AddProjectModal({ onClose, onAdd }) {
   const [preview, setPreview] = useState(null);
   const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
-  };
+  }
 
-  const handleFile = (e) => {
+  function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!/\.jpe?g$/i.test(file.name)) return setMessage('Image invalide : uniquement .jpg / .jpeg');
@@ -29,125 +30,106 @@ export default function AddProjectModal({ onClose, onAdd }) {
     setFormData((p) => ({ ...p, imageFile: file }));
     setPreview(URL.createObjectURL(file));
     setMessage('');
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setMessage('');
     try {
       const token = getToken();
+      if (!token) return setMessage('Vous devez être connecté.');
+
       const body = new FormData();
       body.append('title', formData.title);
       body.append('description', formData.description);
       body.append('tech', formData.tech);
-      if (formData.githubUrl) body.append('githubUrl', formData.githubUrl);
-      if (formData.demoUrl) body.append('demoUrl', formData.demoUrl);
+      body.append('githubUrl', formData.githubUrl);
+      body.append('demoUrl', formData.demoUrl);
       if (formData.imageFile) body.append('image', formData.imageFile);
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/projects`, {
+      const res = await fetch(`${API}/projects`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { ...authHeader() },
         body,
       });
 
       if (!res.ok) throw new Error('Erreur lors de la création du projet');
       const newProject = await res.json();
+      setMessage('Projet ajouté ✅');
       onAdd?.(newProject);
     } catch (err) {
       setMessage(err.message || 'Erreur lors de l’ajout');
     }
-  };
+  }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <motion.div
+      className="modal-backdrop"
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
       <motion.div
-        className="add-project-modal"
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 30, opacity: 0 }}
-        transition={{ duration: 0.25 }}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Ajouter un projet"
       >
         <button className="close-btn" onClick={onClose} aria-label="Fermer">
           <X />
         </button>
+
         <h3>Ajouter un projet</h3>
+        <form onSubmit={handleSubmit} className="add-form">
+          <input
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Titre"
+            required
+          />
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Description"
+            rows={4}
+            required
+          />
+          <input
+            name="tech"
+            value={formData.tech}
+            onChange={handleChange}
+            placeholder="Technologies (séparées par des virgules)"
+          />
+          <input
+            name="githubUrl"
+            value={formData.githubUrl}
+            onChange={handleChange}
+            placeholder="URL GitHub"
+          />
+          <input
+            name="demoUrl"
+            value={formData.demoUrl}
+            onChange={handleChange}
+            placeholder="URL Démo"
+          />
 
-        <form onSubmit={handleSubmit} className="form">
-          <div className="form-group">
-            <label htmlFor="title">Titre</label>
-            <input
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Ex: Kasa"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Brève description du projet"
-              rows={4}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="tech">Technologies</label>
-            <input
-              id="tech"
-              name="tech"
-              value={formData.tech}
-              onChange={handleChange}
-              placeholder="React, SCSS, Node..."
-            />
-          </div>
+          <label className="file">
+            <span>Image (.jpg/.jpeg, max 20 Mo)</span>
+            <input type="file" accept=".jpg,.jpeg" onChange={handleFile} />
+          </label>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="githubUrl">Lien GitHub</label>
-              <input
-                id="githubUrl"
-                name="githubUrl"
-                type="url"
-                value={formData.githubUrl}
-                onChange={handleChange}
-                placeholder="https://github.com/..."
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="demoUrl">Lien Démo</label>
-              <input
-                id="demoUrl"
-                name="demoUrl"
-                type="url"
-                value={formData.demoUrl}
-                onChange={handleChange}
-                placeholder="https://exemple.com"
-              />
-            </div>
-          </div>
+          {preview && <img src={preview} alt="Aperçu" className="preview" />}
 
-          <div className="form-group">
-            <label htmlFor="image">Image (jpg/jpeg, max 20 Mo)</label>
-            <input id="image" type="file" accept=".jpg,.jpeg" onChange={handleFile} />
-            {preview && <img src={preview} alt="Aperçu" className="preview" />}
-          </div>
-
-          <button type="submit" className="submit-btn">
-            Créer
-          </button>
           {message && <p className="message">{message}</p>}
+          <div className="actions">
+            <button type="button" onClick={onClose}>
+              Annuler
+            </button>
+            <button type="submit">Ajouter</button>
+          </div>
         </form>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
