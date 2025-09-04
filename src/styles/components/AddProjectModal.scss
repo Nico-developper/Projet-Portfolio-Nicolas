@@ -1,6 +1,14 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
+/* On réutilise la même logique de taille fixe */
+:root {
+  --modal-w: 880px;
+  --modal-h: 640px;
+}
+
+/* Backdrop – compat */
+.modal__backdrop,
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -13,78 +21,169 @@
   padding: 1rem;
 }
 
+/* Conteneur – compat */
+.modal,
 .add-project-modal {
-  background: #fff;
-  color: var(--ink);
+  width: clamp(320px, 92vw, var(--modal-w));
+  height: clamp(440px, 88vh, var(--modal-h));
+  background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-e3);
-  border-radius: 16px;
-  width: min(680px, 92vw);
-  padding: 1.25rem;
+  border-radius: 18px;
+  box-shadow: var(--shadow-e4);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Close */
+.modal__close,
+.add-project-modal .close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+  z-index: 2;
+}
+.modal__close:hover,
+.add-project-modal .close:hover {
+  background: #fff;
+  border-color: var(--border-strong);
+}
+
+/* Header */
+.modal__header,
+.add-project-modal .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 8px;
+  flex: 0 0 auto;
 
   h2 {
-    margin: 0 0 1rem;
-    font-weight: 800;
+    margin: 0;
     color: var(--primary);
+    font-size: 1.25rem;
+    font-weight: 800;
   }
 
-  .form-row {
-    display: grid;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-
-    label {
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    input[type='text'],
-    input[type='file'],
-    textarea {
-      width: 100%;
-      padding: 0.75rem 0.9rem;
-      background: var(--surface-2);
-      color: var(--ink);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      outline: none;
-      transition:
-        border-color 0.2s ease,
-        background 0.2s ease;
-
-      &:focus {
-        border-color: var(--primary);
-      }
-    }
-  }
-
+  .modal__actions,
   .actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
+    gap: 8px;
 
-    .btn {
-      padding: 0.7rem 1rem;
-      border-radius: 999px;
-      border: 2px solid var(--primary);
+    button {
       background: #fff;
       color: var(--primary);
-      font-weight: 600;
+      border: 2px solid var(--primary);
+      border-radius: 999px;
+      padding: 0.45rem 0.85rem;
+      cursor: pointer;
       transition:
-        background 0.2s ease,
+        background-color 0.2s ease,
         color 0.2s ease;
-
-      &--primary,
       &:hover {
         background: var(--primary);
         color: #fff;
       }
     }
+  }
+}
 
-    .message {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: var(--success);
+/* Formulaire plein hauteur pour scroll interne */
+.modal__form,
+.add-project-modal .form {
+  padding: 0;
+  color: var(--ink);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .modal__body,
+  .body {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 12px 18px 18px;
+  }
+}
+
+/* Image preview sans déformation */
+.modal__cover,
+.add-project-modal .cover {
+  display: block;
+  margin: 0 auto 14px;
+  max-width: 100%;
+  max-height: clamp(180px, calc(var(--modal-h) * 0.5), 360px);
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  object-fit: contain;
+}
+
+/* Champs */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+
+  label {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  input,
+  textarea {
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
     }
   }
+  textarea {
+    resize: vertical;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  @include respond-until($breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.preview {
+  margin-top: 10px;
+}
+.error {
+  color: var(--danger);
+  margin-top: 8px;
 }
