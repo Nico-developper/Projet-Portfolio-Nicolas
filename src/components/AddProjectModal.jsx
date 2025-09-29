@@ -1,247 +1,266 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { API, authHeader } from '../services/api';
+import { API } from '@/services/api';
+import { getToken, isAuthenticated as isAuthFn } from '@/services/authService';
+import '@/styles/components/AddProjectModal.scss';
 
-/**
- * Modale d’ajout de projet.
- * Alignée avec pages/Projects.jsx :
- *  - pas de prop isOpen (affichée conditionnellement par le parent)
- *  - callbacks : onClose(), onAdd(newProject)
- */
-export default function AddProjectModal({ onClose, onAdd }) {
-  const dialogRef = useRef(null);
+const MAX_IMG_MB = 20;
+const ACCEPTED_IMG = ['image/jpeg', 'image/jpg'];
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tech, setTech] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
-  const [demoUrl, setDemoUrl] = useState('');
-  const [featured, setFeatured] = useState(false);
-  const [order, setOrder] = useState(0);
+const isHttpUrl = (v) => /^https?:\/\/[^\s]+$/i.test(v);
+const isPublicPath = (v) => typeof v === 'string' && v.startsWith('/');
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-
-  const [saving, setSaving] = useState(false);
+export default function AddProjectModal({ isOpen, onClose, onCreated }) {
+  const backdropRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    tech: '',
+    githubUrl: '',
+    demoUrl: '',
+    coverFile: null,
+    coverPreview: '',
+  });
+
+  const isAuthenticated = isAuthFn();
+
   useEffect(() => {
-    const node = dialogRef.current;
-    if (!node) return;
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose?.();
-      }
-    };
-    node?.addEventListener('keydown', onKeyDown);
-    const t = setTimeout(() => node?.focus?.(), 0);
+    if (!isOpen) return;
+    const t = setTimeout(() => closeBtnRef.current?.focus(), 10);
+    document.body.classList.add('is-modal-open');
     return () => {
-      node?.removeEventListener('keydown', onKeyDown);
       clearTimeout(t);
+      document.body.classList.remove('is-modal-open');
     };
-  }, [onClose]);
+  }, [isOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (imagePreview?.startsWith?.('blob:')) {
-        URL.revokeObjectURL(imagePreview);
-      }
-    };
-  }, [imagePreview]);
+  function onBackdropClick(e) {
+    if (e.target === backdropRef.current) onClose?.();
+  }
 
-  const onPickImage = (e) => {
-    const f = e.target.files?.[0];
-    setError('');
-    if (!f) return;
+  function updateField(name, value) {
+    setForm((f) => ({ ...f, [name]: value }));
+  }
 
-    if (!/^image\/(jpe?g|png|webp)$/i.test(f.type)) {
-      setError('Format image invalide (JPEG/PNG/WebP uniquement).');
+  function onPickCover(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ACCEPTED_IMG.includes(file.type)) {
+      setError('Seuls les fichiers .jpg et .jpeg sont acceptés.');
       return;
     }
-    if (f.size > 4 * 1024 * 1024) {
-      setError('Taille maximale 4 Mo.');
+    if (file.size > MAX_IMG_MB * 1024 * 1024) {
+      setError(`L’image dépasse ${MAX_IMG_MB} Mo.`);
       return;
     }
-    setImageFile(f);
-    const url = URL.createObjectURL(f);
-    setImagePreview(url);
-  };
-
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setTech('');
-    setGithubUrl('');
-    setDemoUrl('');
-    setFeatured(false);
-    setOrder(0);
-    setImageFile(null);
-    if (imagePreview?.startsWith?.('blob:')) URL.revokeObjectURL(imagePreview);
-    setImagePreview(null);
     setError('');
-  };
+    updateField('coverFile', file);
+    const reader = new FileReader();
+    reader.onload = (ev) => updateField('coverPreview', ev.target.result);
+    reader.readAsDataURL(file);
+  }
 
-  const handleSubmit = async (e) => {
-    e?.preventDefault();
+  async function handleCreate(e) {
+    e?.preventDefault?.();
+    if (!isAuthenticated) {
+      setError('Tu dois être connecté pour ajouter un projet.');
+      return;
+    }
+
+    const title = form.title.trim();
+    if (!title) {
+      setError('Le titre est obligatoire.');
+      return;
+    }
+
+    const githubUrl = form.githubUrl.trim();
+    if (githubUrl && !isHttpUrl(githubUrl)) {
+      setError('L’URL GitHub doit commencer par http(s)://');
+      return;
+    }
+
+    const demoUrl = form.demoUrl.trim();
+    if (demoUrl && !(isHttpUrl(demoUrl) || isPublicPath(demoUrl))) {
+      setError('La Démo doit être une URL http(s):// ou un chemin /public.');
+      return;
+    }
+
+    setBusy(true);
+    setError('');
 
     try {
-      setSaving(true);
-      setError('');
-
-      const form = new FormData();
-      form.append('title', title.trim());
-      form.append('description', description.trim());
-      form.append('tech', tech); // string séparée par virgules
-      form.append('githubUrl', githubUrl.trim());
-      form.append('demoUrl', demoUrl.trim());
-      form.append('featured', String(Boolean(featured)));
-      form.append('order', String(Number(order) || 0));
-      if (imageFile) form.append('image', imageFile);
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('description', form.description || '');
+      fd.append('githubUrl', githubUrl || '');
+      fd.append('demoUrl', demoUrl || '');
+      fd.append('tech', form.tech || '');
+      if (form.coverFile) fd.append('image', form.coverFile);
 
       const res = await fetch(`${API}/projects`, {
         method: 'POST',
-        headers: { ...authHeader() },
-        body: form,
+        headers: { Authorization: `Bearer ${getToken() || ''}` },
+        body: fd,
       });
 
       if (!res.ok) {
-        const t = await res.json().catch(() => ({}));
-        throw new Error(t?.message || 'Création impossible');
+        const msg = await safeErr(res);
+        throw new Error(msg || 'Échec de la création.');
       }
       const created = await res.json();
-      onAdd?.(created);
-      resetForm();
+
+      setForm({
+        title: '',
+        description: '',
+        tech: '',
+        githubUrl: '',
+        demoUrl: '',
+        coverFile: null,
+        coverPreview: '',
+      });
+      onCreated?.(created);
       onClose?.();
     } catch (err) {
-      setError(err.message || 'Erreur lors de l’ajout');
+      setError(err.message);
     } finally {
-      setSaving(false);
+      setBusy(false);
     }
-  };
+  }
 
-  return (
-    <div className="modal__backdrop" aria-hidden={false}>
-      <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-project-title"
-        ref={dialogRef}
-        tabIndex={-1}
-      >
-        <button className="modal__close" onClick={onClose} aria-label="Fermer">
-          ×
-        </button>
+  if (!isOpen) return null;
 
-        <form className="modal__form" onSubmit={handleSubmit}>
-          <header className="modal__header">
-            <h2 id="add-project-title">Ajouter un projet</h2>
-            <div className="modal__actions">
-              <button type="button" onClick={onClose}>
-                Annuler
-              </button>
-              <button type="submit" disabled={saving}>
-                {saving ? 'Ajout...' : 'Créer'}
-              </button>
-            </div>
-          </header>
+  return createPortal(
+    <div
+      className="modal__backdrop"
+      ref={backdropRef}
+      onMouseDown={onBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Ajouter un projet"
+    >
+      <div className="modal">
+        <div className="modal__header">
+          <h2>Ajouter un projet</h2>
+          <button
+            ref={closeBtnRef}
+            className="close modal__close"
+            aria-label="Fermer"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        </div>
 
-          <div className="modal__body">
-            <div className="field">
-              <label htmlFor="title">Titre</label>
-              <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <div className="modal__body">
+          <form className="form" onSubmit={handleCreate}>
+            <div className="grid">
+              <div className="field">
+                <label htmlFor="title">Titre *</label>
+                <input
+                  id="title"
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => updateField('title', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="tech">Technologies (séparées par des virgules)</label>
+                <input
+                  id="tech"
+                  type="text"
+                  value={form.tech}
+                  onChange={(e) => updateField('tech', e.target.value)}
+                  placeholder="React, Node.js, MongoDB"
+                />
+              </div>
             </div>
 
             <div className="field">
               <label htmlFor="description">Description</label>
               <textarea
                 id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={5}
-                required
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="tech">Technologies (séparées par des virgules)</label>
-              <input
-                id="tech"
-                value={tech}
-                onChange={(e) => setTech(e.target.value)}
-                placeholder="React, Node, MongoDB, ..."
+                value={form.description}
+                onChange={(e) => updateField('description', e.target.value)}
               />
             </div>
 
             <div className="grid">
               <div className="field">
-                <label htmlFor="githubUrl">GitHub</label>
+                <label htmlFor="githubUrl">URL GitHub</label>
                 <input
                   id="githubUrl"
                   type="url"
-                  value={githubUrl}
-                  onChange={(e) => setGithubUrl(e.target.value)}
+                  value={form.githubUrl}
+                  onChange={(e) => updateField('githubUrl', e.target.value)}
                   placeholder="https://github.com/..."
                 />
               </div>
-
               <div className="field">
-                <label htmlFor="demoUrl">Démo</label>
+                <label htmlFor="demoUrl">URL Démo (http(s):// ou /public)</label>
                 <input
                   id="demoUrl"
-                  type="url"
-                  value={demoUrl}
-                  onChange={(e) => setDemoUrl(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-
-            <div className="grid">
-              <div className="field checkbox">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={featured}
-                    onChange={(e) => setFeatured(e.target.checked)}
-                  />
-                  Mettre en avant
-                </label>
-              </div>
-
-              <div className="field">
-                <label htmlFor="order">Ordre d’affichage</label>
-                <input
-                  id="order"
-                  type="number"
-                  value={order}
-                  onChange={(e) => setOrder(e.target.value)}
-                  min={0}
+                  type="text"
+                  value={form.demoUrl}
+                  onChange={(e) => updateField('demoUrl', e.target.value)}
+                  placeholder="https://... ou /demos/mon-projet/index.html"
                 />
               </div>
             </div>
 
             <div className="field">
-              <label htmlFor="image">Image de couverture (JPEG/PNG/WebP, ≤ 4 Mo)</label>
-              <input id="image" type="file" accept=".jpg,.jpeg,.png,.webp" onChange={onPickImage} />
+              <label htmlFor="cover">Image de couverture (.jpg/.jpeg, max {MAX_IMG_MB} Mo)</label>
+              <input id="cover" type="file" accept=".jpg,.jpeg,image/jpeg" onChange={onPickCover} />
+              {form.coverPreview && (
+                <div className="preview">
+                  <img
+                    src={form.coverPreview}
+                    alt="Aperçu de l’image sélectionnée"
+                    className="cover"
+                  />
+                </div>
+              )}
             </div>
 
-            {imagePreview && (
-              <div className="preview">
-                <img src={imagePreview} alt="Aperçu de l’image" className="modal__cover" />
+            {error && (
+              <div className="error" role="alert">
+                {error}
               </div>
             )}
+          </form>
+        </div>
 
-            {error && <p className="error">{error}</p>}
-          </div>
-        </form>
+        <div className="modal__floating-actions">
+          <button className="button small" onClick={onClose} disabled={busy}>
+            Annuler
+          </button>
+          <button className="button small" onClick={handleCreate} disabled={busy}>
+            {busy ? 'Ajout en cours...' : 'Ajouter'}
+          </button>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 AddProjectModal.propTypes = {
+  isOpen: PropTypes.bool,
   onClose: PropTypes.func,
-  onAdd: PropTypes.func, // onAdd(newProject)
+  onCreated: PropTypes.func,
 };
+
+async function safeErr(res) {
+  try {
+    const t = await res.text();
+    return t || res.statusText;
+  } catch {
+    return res.statusText;
+  }
+}

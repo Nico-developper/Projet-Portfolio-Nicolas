@@ -1,65 +1,99 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
-/* Carte projet – compatible avec l'apparence actuelle */
+/* Hauteur globale des cartes — ajuste si besoin */
+:root {
+  --card-h-min: 240px;
+  --card-h-vw: 26vw;
+  --card-h-max: 320px;
+}
+
+/* Carte projet */
 .project-card {
   background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--border);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: hidden; /* image collée aux bords */
   box-shadow: var(--shadow-e2);
   cursor: pointer;
+  position: relative;
+
+  /* 2/3 image – 1/3 contenu */
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+  height: clamp(var(--card-h-min), var(--card-h-vw), var(--card-h-max));
+
+  /* IMPORTANT: sinon la rangée 1 peut “pousser” la rangée texte */
+
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
     border-color 0.2s ease;
 
-  &:hover {
+  > * {
+    min-height: 0;
+  }
+
+  &:hover,
+  &:focus-within {
     transform: translateY(-2px);
     box-shadow: var(--shadow-e3);
     border-color: var(--border-strong);
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-  }
-
-  > img,
-  .project-card__placeholder {
-    width: 100%;
-    aspect-ratio: 16/9;
-    display: block;
-    object-fit: cover;
+  /* Bloc image */
+  .media {
+    margin: 0; /* supprime la marge par défaut de <figure> */
+    position: relative;
+    overflow: hidden; /* masque tout débordement */
     background: var(--surface-2);
+    min-height: 0; /* autorise le shrink dans le grid */
+
+    &__img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* remplit la zone 2/3 */
+      object-position: top; /* cadré par le haut */
+    }
+
+    .badge {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: var(--shadow-e2);
+    }
   }
 
-  .project-card__placeholder {
-    display: grid;
-    place-items: center;
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-
-  .project-card__footer {
+  /* Bloc texte (1/3) */
+  .content {
+    min-height: 0; /* idem */
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
+    justify-content: center; /* centré dans son tiers */
     gap: 6px;
-    padding: 12px 14px 14px;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.03) 100%);
 
-    h3 {
-      margin: 0 0 6px 0;
+    .title {
+      margin: 0;
       font-size: 1.05rem;
-      line-height: 1.3;
+      font-weight: 800;
       color: var(--ink);
-      font-weight: 700;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .tech {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
@@ -68,11 +102,12 @@
   }
 }
 
-/* Grille (au besoin) */
+/* Grille des cartes */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  align-items: stretch;
 
   @include respond-until($breakpoint-lg) {
     grid-template-columns: repeat(2, 1fr);

@@ -6,8 +6,9 @@ import Projects from './pages/Projects';
 import Contact from './pages/Contact';
 import Login from './components/Login';
 import Footer from './components/Footer';
-import Parcours from './pages/Parcours';
 import HomeBackground from './components/HomeBackground';
+import Services from './pages/Services';
+import ScrollToTop from './components/ScrollToTop';
 
 const isProd = import.meta.env.PROD;
 
@@ -24,20 +25,20 @@ export default function App() {
       <a href="#main" className="skip-link">
         Aller au contenu
       </a>
+      {/* Scroll to top on route change */}
+      <ScrollToTop behavior="auto" /> {/* change en "smooth" si tu veux une animation */}
       <HomeBackground />
       <Header />
-
-      <main id="main" className="portfolio" role="main">
+      <main id="main" className="portfolio" role="main" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/parcours" element={<Parcours />} />
+          <Route path="/services" element={<Services />} />
         </Routes>
       </main>
-
       <Footer />
     </Router>
   );

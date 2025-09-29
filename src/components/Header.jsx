@@ -21,7 +21,7 @@ export default function Header() {
       <div className="container">
         <h1 className="logo">
           <Link to="/" onClick={closeMenu}>
-            Nicolas Développeur
+            Nicolas Billière
           </Link>
         </h1>
 
@@ -34,7 +34,7 @@ export default function Header() {
             </li>
             <li>
               <Link to="/about" onClick={closeMenu}>
-                À propos
+                A propos
               </Link>
             </li>
             <li>
@@ -42,11 +42,13 @@ export default function Header() {
                 Projets
               </Link>
             </li>
+
             <li>
-              <Link to="/parcours" onClick={closeMenu}>
-                Parcours
+              <Link to="/services" onClick={closeMenu}>
+                Services et tarifs
               </Link>
             </li>
+
             <li>
               <Link to="/contact" onClick={closeMenu}>
                 Contact

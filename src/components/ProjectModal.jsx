@@ -1,439 +1,416 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { API, authHeader } from '../services/api';
-import { isAuthenticated as checkAuth } from '@/services/authService';
+import { API } from '@/services/api';
+import { getToken, isAuthenticated as isAuthFn } from '@/services/authService';
+import '@/styles/components/Modal.scss';
 
-export default function ProjectModal({ project, onClose, onNext, onPrev, onDelete, onUpdate }) {
-  const dialogRef = useRef(null);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+const isHttpUrl = (v) => /^https?:\/\/[^\s]+$/i.test(v);
+const isPublicPath = (v) => typeof v === 'string' && v.startsWith('/');
+const normUrl = (v) => (isHttpUrl(v) || isPublicPath(v) ? v : '');
+const splitTech = (v) =>
+  Array.isArray(v)
+    ? v
+    : typeof v === 'string'
+      ? v
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
+
+const MAX_IMG_MB = 20;
+const ACCEPTED_IMG = ['image/jpeg', 'image/jpg'];
+
+export default function ProjectModal({
+  isOpen,
+  project,
+  index,
+  total,
+  onClose,
+  onPrev,
+  onNext,
+  onUpdated,
+  onDeleted,
+}) {
+  const backdropRef = useRef(null);
+  const closeBtnRef = useRef(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  // Auth
-  const [canEdit, setCanEdit] = useState(false);
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    githubUrl: '',
+    demoUrl: '',
+    tech: '',
+    coverFile: null,
+    coverPreview: '',
+  });
+
+  const isAuthenticated = isAuthFn();
+  const tags = useMemo(() => splitTech(project?.tech), [project]);
+
   useEffect(() => {
-    setCanEdit(checkAuth());
+    if (!isOpen) return;
+    const t = setTimeout(() => closeBtnRef.current?.focus(), 10);
+    document.body.classList.add('is-modal-open');
+    return () => {
+      clearTimeout(t);
+      document.body.classList.remove('is-modal-open');
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!project) return;
+    setIsEditing(false);
+    setError('');
+    setForm({
+      title: project.title || '',
+      description: project.description || '',
+      githubUrl: project.githubUrl || '',
+      demoUrl: project.demoUrl || '',
+      tech:
+        Array.isArray(project.tech) && project.tech.length
+          ? project.tech.join(', ')
+          : typeof project.tech === 'string'
+            ? project.tech
+            : '',
+      coverFile: null,
+      coverPreview: project.coverImage ? project.coverImage : '',
+    });
   }, [project]);
 
-  // Form state
-  const [title, setTitle] = useState(project?.title ?? '');
-  const [description, setDescription] = useState(project?.description ?? '');
-  const [tech, setTech] = useState(
-    Array.isArray(project?.tech)
-      ? project.tech.join(', ')
-      : typeof project?.tech === 'string'
-        ? project.tech
-        : '',
-  );
-  const [githubUrl, setGithubUrl] = useState(project?.githubUrl ?? '');
-  const [demoUrl, setDemoUrl] = useState(project?.demoUrl ?? '');
-  const [featured, setFeatured] = useState(Boolean(project?.featured));
-  const [order, setOrder] = useState(Number.isFinite(project?.order) ? project.order : 0);
+  const coverSrc = useMemo(() => {
+    if (form.coverPreview) return form.coverPreview;
+    if (project?.coverImage) return project.coverImage;
+    return '';
+  }, [form.coverPreview, project]);
 
-  // Image preview & fichier
-  const initialCover = useMemo(() => {
-    if (!project?.coverImage) return null;
-    if (project.coverImage?.startsWith?.('data:')) return project.coverImage;
-    return `data:image/jpeg;base64,${project.coverImage}`;
-  }, [project]);
-
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(initialCover);
-
-  useEffect(() => {
-    setTitle(project?.title ?? '');
-    setDescription(project?.description ?? '');
-    setTech(
-      Array.isArray(project?.tech)
-        ? project.tech.join(', ')
-        : typeof project?.tech === 'string'
-          ? project.tech
-          : '',
-    );
-    setGithubUrl(project?.githubUrl ?? '');
-    setDemoUrl(project?.demoUrl ?? '');
-    setFeatured(Boolean(project?.featured));
-    setOrder(Number.isFinite(project?.order) ? project.order : 0);
-    setImageFile(null);
-    setImagePreview(initialCover);
-    setEditing(false);
-    setError('');
-  }, [project, initialCover]);
-
-  // Focus trap + ESC + ← →
-  useEffect(() => {
-    const node = dialogRef.current;
-    if (!node) return;
-
-    const focusable = () =>
-      node?.querySelectorAll(
-        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
-      );
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose?.();
-      }
-      if (e.key === 'Tab') {
-        const items = Array.from(focusable() ?? []);
-        if (items.length === 0) return;
-        const first = items[0];
-        const last = items[items.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-      if (!editing && e.key === 'ArrowRight') onNext?.();
-      if (!editing && e.key === 'ArrowLeft') onPrev?.();
-    };
-
-    node?.addEventListener('keydown', onKeyDown);
-    const timer = setTimeout(() => node?.focus?.(), 0);
-    return () => {
-      node?.removeEventListener('keydown', onKeyDown);
-      clearTimeout(timer);
-    };
-  }, [onClose, onNext, onPrev, editing]);
-
-  useEffect(() => {
-    return () => {
-      if (imagePreview?.startsWith?.('blob:')) URL.revokeObjectURL(imagePreview);
-    };
-  }, [imagePreview]);
-
-  const onPickImage = (e) => {
-    const f = e.target.files?.[0];
-    setError('');
-    if (!f) return;
-    if (!/^image\/(jpe?g|png|webp)$/i.test(f.type))
-      return setError('Format image invalide (JPEG/PNG/WebP uniquement).');
-    if (f.size > 4 * 1024 * 1024) return setError('Taille maximale 4 Mo.');
-    setImageFile(f);
-    setImagePreview(URL.createObjectURL(f));
-  };
-
-  const identifier = project?._id ?? project?.slug;
-
-  const handleSave = async (e) => {
-    e?.preventDefault();
-    if (!identifier) return;
-    try {
-      setSaving(true);
-      setError('');
-      const form = new FormData();
-      form.append('title', title.trim());
-      form.append('description', description.trim());
-      form.append('tech', tech);
-      form.append('githubUrl', githubUrl.trim());
-      form.append('demoUrl', demoUrl.trim());
-      form.append('featured', String(Boolean(featured)));
-      form.append('order', String(Number(order) || 0));
-      if (imageFile) form.append('image', imageFile);
-
-      const res = await fetch(`${API}/projects/${identifier}`, {
-        method: 'PUT',
-        headers: { ...authHeader() },
-        body: form,
-      });
-      if (!res.ok) {
-        const t = await res.json().catch(() => ({}));
-        throw new Error(t?.message || 'Erreur serveur');
-      }
-      const updated = await res.json();
-      onUpdate?.(updated);
-      setEditing(false);
-    } catch (err) {
-      setError(err.message || 'Impossible d’enregistrer');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!identifier) return;
-    // eslint-disable-next-line no-alert
-    const ok = window.confirm(`Supprimer définitivement le projet « ${project.title} » ?`);
-    if (!ok) return;
-    try {
-      setDeleting(true);
-      setError('');
-      const res = await fetch(`${API}/projects/${identifier}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', ...authHeader() },
-      });
-      if (!res.ok) {
-        const t = await res.json().catch(() => ({}));
-        throw new Error(t?.message || 'Suppression refusée');
-      }
-      onDelete?.(project.slug);
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
       onClose?.();
-    } catch (err) {
-      setError(err.message || 'Erreur de suppression');
-    } finally {
-      setDeleting(false);
     }
-  };
+    if (e.key === 'ArrowLeft') onPrev?.();
+    if (e.key === 'ArrowRight') onNext?.();
+  }
+  function onBackdropClick(e) {
+    if (e.target === backdropRef.current) onClose?.();
+  }
+  function updateField(name, value) {
+    setForm((f) => ({ ...f, [name]: value }));
+  }
 
-  // Fermer au clic en dehors
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) onClose?.();
-  };
+  function onPickCover(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ACCEPTED_IMG.includes(file.type)) {
+      setError('Seuls les fichiers .jpg et .jpeg sont acceptés.');
+      return;
+    }
+    if (file.size > MAX_IMG_MB * 1024 * 1024) {
+      setError(`L’image dépasse ${MAX_IMG_MB} Mo.`);
+      return;
+    }
+    setError('');
+    setForm((f) => ({ ...f, coverFile: file }));
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm((f) => ({ ...f, coverPreview: ev.target.result }));
+    reader.readAsDataURL(file);
+  }
 
-  if (!project) return null;
+  async function handleSave() {
+    if (!isAuthenticated) return;
+    const title = form.title.trim();
+    if (!title) {
+      setError('Le titre est obligatoire.');
+      return;
+    }
 
-  const readCover = imagePreview || initialCover || null;
-  const viewTechs = useMemo(() => {
-    if (editing) return [];
-    if (Array.isArray(project?.tech)) return project.tech;
-    if (typeof project?.tech === 'string')
-      return project.tech
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
-    return [];
-  }, [project, editing]);
+    const githubUrl = form.githubUrl.trim();
+    const demoUrl = form.demoUrl.trim();
+    if (githubUrl && !isHttpUrl(githubUrl)) {
+      setError('L’URL GitHub doit commencer par http(s)://');
+      return;
+    }
+    if (demoUrl && !(isHttpUrl(demoUrl) || isPublicPath(demoUrl))) {
+      setError('La Démo doit être une URL http(s):// ou un chemin /public.');
+      return;
+    }
 
-  return (
-    <div className="modal__backdrop" onMouseDown={handleBackdropClick} aria-hidden={false}>
-      <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-modal-title"
-        ref={dialogRef}
-        tabIndex={-1}
-        onMouseDown={(e) => e.stopPropagation()} // évite de propager à la backdrop
-      >
-        <button className="modal__close" onClick={onClose} aria-label="Fermer">
-          ×
+    setBusy(true);
+    setError('');
+    try {
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('description', form.description || '');
+      fd.append('githubUrl', githubUrl || '');
+      fd.append('demoUrl', demoUrl || '');
+      fd.append('tech', form.tech || '');
+      if (form.coverFile) fd.append('image', form.coverFile); // IMPORTANT
+
+      const res = await fetch(`${API}/projects/${project._id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${getToken() || ''}` },
+        body: fd,
+      });
+      if (!res.ok) throw new Error((await safeErr(res)) || 'Échec de la sauvegarde.');
+      const updated = await res.json();
+      setIsEditing(false);
+      onUpdated?.(updated);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!isAuthenticated) return;
+    const ok = window.confirm('Supprimer ce projet ? Cette action est définitive.');
+    if (!ok) return;
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch(`${API}/projects/${project._id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getToken() || ''}` },
+      });
+      if (!res.ok) throw new Error((await safeErr(res)) || 'Impossible de supprimer ce projet.');
+      onDeleted?.(project._id);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function openLink(e, url) {
+    e.stopPropagation();
+    if (!url) return;
+    const u = normUrl(url);
+    if (!u) return;
+    const final = u.startsWith('http') ? u : `${window.location.origin}${u.replace(/^\//, '/')}`;
+    window.open(final, '_blank', 'noopener,noreferrer');
+  }
+
+  if (!isOpen || !project) return null;
+
+  return createPortal(
+    <div
+      className="modal__backdrop"
+      ref={backdropRef}
+      onMouseDown={onBackdropClick}
+      onKeyDown={onKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Projet ${project.title}`}
+    >
+      <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
+        <button ref={closeBtnRef} className="modal__close" aria-label="Fermer" onClick={onClose}>
+          ✕
         </button>
 
-        {!editing ? (
-          <>
-            <header className="modal__header">
-              <h2 id="project-modal-title">{project.title}</h2>
-            </header>
+        <div className="modal__header">
+          <h2>
+            {isEditing ? 'Modifier le projet' : project.title}
+            {typeof index === 'number' && typeof total === 'number' && (
+              <span style={{ marginLeft: 8, color: 'var(--muted)', fontSize: '.9rem' }}>
+                {index + 1}/{total}
+              </span>
+            )}
+          </h2>
+        </div>
 
-            <div className="modal__body">
-              {readCover && (
-                <img
-                  src={readCover}
-                  alt={`Couverture ${project.title}`}
-                  className="modal__cover"
-                  loading="lazy"
-                />
+        <div className="modal__body">
+          {!isEditing ? (
+            <>
+              {/** Zone image scrollable uniquement */}
+              {coverSrc && (
+                <div className="modal__media">
+                  <img src={coverSrc} alt={`Aperçu ${project.title}`} />
+                </div>
               )}
 
-              <p className="modal__description">{project.description}</p>
+              {project.description && <p className="modal__description">{project.description}</p>}
 
-              {viewTechs.length > 0 && (
+              {tags.length > 0 && (
                 <ul className="modal__tags">
-                  {viewTechs.map((t, i) => (
-                    <li key={`${t}-${i}`} className="tag">
+                  {tags.map((t, i) => (
+                    <li key={i} className="tag">
                       {t}
                     </li>
                   ))}
                 </ul>
               )}
-
-              <div className="modal__links">
-                {project.githubUrl && (
-                  <a href={project.githubUrl} target="_blank" rel="noreferrer" className="button">
-                    Code
-                  </a>
-                )}
-                {project.demoUrl && (
-                  <a
-                    href={project.demoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="button outline"
-                  >
-                    Démo
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Actions flottantes en bas à droite */}
-            <div className="modal__floating-actions">
-              <div className="nav">
-                {onPrev && (
-                  <button
-                    className="icon-btn"
-                    onClick={onPrev}
-                    aria-label="Projet précédent"
-                    title="Projet précédent"
-                  >
-                    ←
-                  </button>
-                )}
-                {onNext && (
-                  <button
-                    className="icon-btn"
-                    onClick={onNext}
-                    aria-label="Projet suivant"
-                    title="Projet suivant"
-                  >
-                    →
-                  </button>
-                )}
-              </div>
-
-              {canEdit && (
-                <div className="crud">
-                  <button onClick={() => setEditing(true)} className="button small">
-                    Modifier
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="button small danger"
-                    disabled={deleting}
-                  >
-                    {deleting ? 'Suppression…' : 'Supprimer'}
-                  </button>
+            </>
+          ) : (
+            <form className="modal__form" onSubmit={(e) => e.preventDefault()}>
+              <div className="grid">
+                <div className="field">
+                  <label htmlFor="title">Titre *</label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={form.title}
+                    onChange={(e) => updateField('title', e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <form className="modal__form" onSubmit={handleSave}>
-            <header className="modal__header">
-              <h2 id="project-modal-title">Modifier le projet</h2>
-              <div className="modal__actions">
-                <button
-                  type="button"
-                  className="button small outline"
-                  onClick={() => setEditing(false)}
-                >
-                  Annuler
-                </button>
-                <button type="submit" className="button small" disabled={saving}>
-                  {saving ? 'Enregistrement…' : 'Enregistrer'}
-                </button>
-              </div>
-            </header>
 
-            <div className="modal__body">
-              <div className="field">
-                <label htmlFor="title">Titre</label>
-                <input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
+                <div className="field">
+                  <label htmlFor="tech">Technologies (séparées par des virgules)</label>
+                  <input
+                    id="tech"
+                    type="text"
+                    value={form.tech}
+                    onChange={(e) => updateField('tech', e.target.value)}
+                    placeholder="React, Node.js, MongoDB"
+                  />
+                </div>
               </div>
 
               <div className="field">
                 <label htmlFor="description">Description</label>
                 <textarea
                   id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={5}
-                  required
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="tech">Technologies (séparées par des virgules)</label>
-                <input
-                  id="tech"
-                  value={tech}
-                  onChange={(e) => setTech(e.target.value)}
-                  placeholder="React, Node, MongoDB, ..."
+                  value={form.description}
+                  onChange={(e) => updateField('description', e.target.value)}
                 />
               </div>
 
               <div className="grid">
-                <div className="field checkbox">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={featured}
-                      onChange={(e) => setFeatured(e.target.checked)}
-                    />
-                    Mettre en avant
-                  </label>
-                </div>
-
                 <div className="field">
-                  <label htmlFor="order">Ordre d’affichage</label>
-                  <input
-                    id="order"
-                    type="number"
-                    value={order}
-                    onChange={(e) => setOrder(e.target.value)}
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              <div className="grid">
-                <div className="field">
-                  <label htmlFor="githubUrl">GitHub</label>
+                  <label htmlFor="githubUrl">URL GitHub</label>
                   <input
                     id="githubUrl"
                     type="url"
-                    value={githubUrl}
-                    onChange={(e) => setGithubUrl(e.target.value)}
+                    value={form.githubUrl}
+                    onChange={(e) => updateField('githubUrl', e.target.value)}
                     placeholder="https://github.com/..."
                   />
                 </div>
-
                 <div className="field">
-                  <label htmlFor="demoUrl">Démo</label>
+                  <label htmlFor="demoUrl">URL Démo (http(s):// ou /public)</label>
                   <input
                     id="demoUrl"
-                    type="url"
-                    value={demoUrl}
-                    onChange={(e) => setDemoUrl(e.target.value)}
-                    placeholder="https://..."
+                    type="text"
+                    value={form.demoUrl}
+                    onChange={(e) => updateField('demoUrl', e.target.value)}
+                    placeholder="https://... ou /demos/mon-projet/index.html"
                   />
                 </div>
               </div>
 
               <div className="field">
-                <label htmlFor="image">Image de couverture (JPEG/PNG/WebP, ≤ 4 Mo)</label>
+                <label htmlFor="cover">Image de couverture (.jpg/.jpeg, max {MAX_IMG_MB} Mo)</label>
                 <input
-                  id="image"
+                  id="cover"
                   type="file"
-                  accept=".jpg,.jpeg,.png,.webp"
-                  onChange={onPickImage}
+                  accept=".jpg,.jpeg,image/jpeg"
+                  onChange={onPickCover}
                 />
+                {form.coverPreview && (
+                  <div className="modal__media" style={{ maxHeight: 220 }}>
+                    <img src={form.coverPreview} alt="Aperçu de l’image sélectionnée" />
+                  </div>
+                )}
               </div>
 
-              {imagePreview && (
-                <div className="preview">
-                  <img
-                    src={imagePreview}
-                    alt="Aperçu de la nouvelle image"
-                    className="modal__cover"
-                  />
+              {error && (
+                <div className="error" role="alert">
+                  {error}
                 </div>
               )}
+            </form>
+          )}
+        </div>
 
-              {error && <p className="error">{error}</p>}
-            </div>
-          </form>
-        )}
+        <div className="modal__floating-actions">
+          <div className="nav">
+            <button className="icon-btn" onClick={onPrev} aria-label="Précédent">
+              ←
+            </button>
+            <button className="icon-btn" onClick={onNext} aria-label="Suivant">
+              →
+            </button>
+          </div>
+
+          <div className="actions-right">
+            {!isEditing ? (
+              <>
+                {project.githubUrl && (
+                  <button
+                    className="button small outline"
+                    onClick={(e) => openLink(e, project.githubUrl)}
+                  >
+                    Code
+                  </button>
+                )}
+                {project.demoUrl && (
+                  <button className="button small" onClick={(e) => openLink(e, project.demoUrl)}>
+                    Démo
+                  </button>
+                )}
+                {isAuthenticated && (
+                  <>
+                    <button
+                      className="button small"
+                      onClick={() => setIsEditing(true)}
+                      disabled={busy}
+                    >
+                      Modifier
+                    </button>
+                    <button className="button small danger" onClick={handleDelete} disabled={busy}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
+                <button className="button small" onClick={onClose}>
+                  Fermer
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="button small"
+                  onClick={() => setIsEditing(false)}
+                  disabled={busy}
+                >
+                  Annuler
+                </button>
+                <button className="button small" onClick={handleSave} disabled={busy}>
+                  {busy ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 ProjectModal.propTypes = {
+  isOpen: PropTypes.bool,
   project: PropTypes.object,
+  index: PropTypes.number,
+  total: PropTypes.number,
   onClose: PropTypes.func,
-  onNext: PropTypes.func,
   onPrev: PropTypes.func,
-  onDelete: PropTypes.func, // onDelete(slug)
-  onUpdate: PropTypes.func, // onUpdate(updatedProject)
+  onNext: PropTypes.func,
+  onUpdated: PropTypes.func,
+  onDeleted: PropTypes.func,
 };
+
+async function safeErr(res) {
+  try {
+    const t = await res.text();
+    return t || res.statusText;
+  } catch {
+    return res.statusText;
+  }
+}

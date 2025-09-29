@@ -1,13 +1,12 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
-/* On réutilise la même logique de taille fixe */
 :root {
   --modal-w: 880px;
   --modal-h: 640px;
 }
 
-/* Backdrop – compat */
+/* Backdrop */
 .modal__backdrop,
 .modal-overlay {
   position: fixed;
@@ -15,128 +14,61 @@
   background: var(--overlay);
   backdrop-filter: blur(3px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  justify-content: center;
   padding: 1rem;
+  z-index: 999999; /* > header */
 }
 
-/* Conteneur – compat */
 .modal,
-.add-project-modal {
+.modal-content {
   width: clamp(320px, 92vw, var(--modal-w));
   height: clamp(440px, 88vh, var(--modal-h));
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
   box-shadow: var(--shadow-e4);
-  outline: none;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Close */
-.modal__close,
-.add-project-modal .close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink);
-  font-size: 22px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
-  z-index: 2;
-}
-.modal__close:hover,
-.add-project-modal .close:hover {
-  background: #fff;
-  border-color: var(--border-strong);
-}
-
-/* Header */
-.modal__header,
-.add-project-modal .header {
+.modal__header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 16px 18px 8px;
-  flex: 0 0 auto;
 
   h2 {
     margin: 0;
-    color: var(--primary);
     font-size: 1.25rem;
     font-weight: 800;
-  }
-
-  .modal__actions,
-  .actions {
-    display: flex;
-    gap: 8px;
-
-    button {
-      background: #fff;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-      border-radius: 999px;
-      padding: 0.45rem 0.85rem;
-      cursor: pointer;
-      transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
-      &:hover {
-        background: var(--primary);
-        color: #fff;
-      }
-    }
+    color: var(--primary);
   }
 }
 
-/* Formulaire plein hauteur pour scroll interne */
-.modal__form,
-.add-project-modal .form {
-  padding: 0;
-  color: var(--ink);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  .modal__body,
-  .body {
-    flex: 1 1 auto;
-    overflow: auto;
-    padding: 12px 18px 18px;
-  }
+.modal__body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 12px 18px 18px;
 }
 
-/* Image preview sans déformation */
-.modal__cover,
-.add-project-modal .cover {
+/* Aperçu image : cover + top */
+.preview {
+  margin-top: 10px;
+}
+.preview img {
+  width: 100%;
+  height: 220px;
   display: block;
-  margin: 0 auto 14px;
-  max-width: 100%;
-  max-height: clamp(180px, calc(var(--modal-h) * 0.5), 360px);
-  width: auto;
-  height: auto;
   border-radius: 14px;
   border: 1px solid var(--border);
-  object-fit: contain;
+  object-fit: cover;
+  object-position: top;
+  background: #f1f3f8;
 }
 
-/* Champs */
 .field {
   display: flex;
   flex-direction: column;
@@ -145,28 +77,28 @@
 
   label {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: var(--muted-strong);
+    font-weight: 700;
   }
-
-  input,
+  input[type='text'],
+  input[type='number'],
+  input[type='url'],
   textarea {
     background: #fff;
-    color: var(--ink);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
-    font-size: 0.95rem;
-    outline: none;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+    font: inherit;
+    color: var(--ink);
 
     &:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+      outline: none;
     }
   }
   textarea {
+    min-height: 120px;
     resize: vertical;
   }
 }
@@ -180,10 +112,61 @@
   }
 }
 
-.preview {
-  margin-top: 10px;
-}
 .error {
   color: var(--danger);
   margin-top: 8px;
+}
+
+/* Actions */
+.modal__floating-actions {
+  position: sticky;
+  inset: auto 0 0 0;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface) 90%, #000 10%);
+  backdrop-filter: blur(6px);
+  border-radius: 0 0 14px 14px;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  .button.small {
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    border: 2px solid var(--primary);
+    background: #fff;
+    color: var(--primary);
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+
+    &:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+  }
+}
+
+@include respond-until($breakpoint-md) {
+  .modal,
+  .modal-content {
+    width: min(96vw, var(--modal-w));
+    height: min(92vh, var(--modal-h));
+    border-radius: 14px;
+  }
+
+  .modal__header {
+    padding: 10px 14px;
+  }
+  .modal__body {
+    padding: 10px 14px 72px;
+  }
+}
+
+/* Empêche le scroll de fond quand une modale est ouverte */
+body.is-modal-open {
+  overflow: hidden;
 }

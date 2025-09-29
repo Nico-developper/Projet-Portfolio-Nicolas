@@ -1,0 +1,179 @@
+@use '../variables' as *;
+@use '../breakpoints' as *;
+
+/* Variables de mise en page */
+.timeline {
+  --rail-w: clamp(22px, 3vw, 36px); /* largeur du rail */
+  --gap-x: clamp(12px, 3vw, 28px); /* espace horizontal colonne↔rail */
+  --gap-y: clamp(20px, 3.2vw, 32px); /* espace vertical entre lignes */
+  margin-top: 24px;
+}
+
+/* En-têtes "Formations" / "Expériences" */
+.timeline__headers {
+  display: grid;
+  grid-template-columns: 1fr var(--rail-w) 1fr;
+  align-items: end;
+  gap: var(--gap-x);
+  margin-bottom: 8px;
+}
+
+.timeline__col-title {
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+/* Grille principale : mobile = rail | contenu ; ≥md = gauche | rail | droite */
+.timeline__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: var(--rail-w) 1fr; /* mobile */
+  column-gap: var(--gap-x);
+  row-gap: var(--gap-y);
+
+  @include respond-from($breakpoint-md) {
+    grid-template-columns: 1fr var(--rail-w) 1fr; /* gauche | rail | droite */
+  }
+}
+
+.timeline__row {
+  display: contents;
+}
+
+/* Rail central (pointillé) + tête d’en-tête */
+.timeline__rail,
+.timeline__rail-head {
+  position: relative;
+  width: var(--rail-w);
+  min-height: 64px; /* donne de la place pour la pastille & l’étiquette */
+  justify-self: center;
+}
+
+.timeline__rail::before,
+.timeline__rail-head::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border),
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+/* Pastille centrée sur la ligne, étiquette au-dessus du rail */
+.timeline__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.timeline__date {
+  position: absolute;
+  left: 50%;
+  top: 0; /* étiquette au-dessus de la ligne */
+  transform: translate(-50%, -120%); /* la remonter un peu plus */
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px dotted var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  z-index: 2; /* passe au-dessus des cartes */
+}
+
+/* Colonnes : en mobile, tout le contenu va à droite du rail (col 2) */
+.timeline__col {
+  grid-column: 2;
+
+  @include respond-from($breakpoint-md) {
+    &--left {
+      grid-column: 1;
+    }
+    &--right {
+      grid-column: 3;
+    }
+  }
+}
+
+/* Cartes : espace supplémentaire pour éviter tout chevauchement avec le rail */
+.timeline__col--left .tl-card {
+  margin-right: clamp(10px, 2.5vw, 28px);
+}
+.timeline__col--right .tl-card {
+  margin-left: clamp(10px, 2.5vw, 28px);
+}
+
+/* Carte */
+.tl-card {
+  background: var(--surface);
+  color: var(--ink);
+  border: 3px solid var(--primary);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+  transition-delay: var(--delay, 0ms);
+}
+
+.timeline.is-visible .tl-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tl-card__title {
+  margin: 0 0 4px;
+  color: var(--secondary);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.tl-card__subtitle {
+  margin: 0 0 8px;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.tl-card__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 4px;
+}
+
+.tl-card__note {
+  margin-top: 6px;
+}
+.tl-card__link a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Accessibilité : stoppe les animations si reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .tl-card {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,40 +1,45 @@
-const API_BASE = import.meta.env.PROD
-  ? import.meta.env.VITE_API_URL?.replace(/\/+$/, '') || ''
-  : '';
-const API = API_BASE ? `${API_BASE}/api` : '/api';
+// src/services/authService.js
+import { API } from './api';
 
-export async function login(arg1, arg2) {
-  let email, password;
-  if (typeof arg1 === 'object' && arg1 !== null) {
-    ({ email, password } = arg1);
-  } else {
-    email = arg1;
-    password = arg2;
+const STORAGE_KEY = 'token';
+
+export function setToken(token) {
+  if (typeof token === 'string' && token.trim()) {
+    localStorage.setItem(STORAGE_KEY, token.trim());
   }
+}
+export function getToken() {
+  const t = localStorage.getItem(STORAGE_KEY);
+  return t && t.trim() ? t.trim() : null;
+}
+export function clearToken() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+export function isAuthenticated() {
+  return !!getToken();
+}
+
+export async function login(email, password) {
   const res = await fetch(`${API}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
-    credentials: 'include',
   });
   if (!res.ok) {
-    const msg = await res.text().catch(() => '');
-    throw new Error(msg || 'Identifiants invalides');
+    let msg = 'Connexion impossible';
+    try {
+      const j = await res.json();
+      if (j?.error) msg = j.error;
+      if (j?.message) msg = j.message;
+    } catch {}
+    throw new Error(msg);
   }
   const data = await res.json();
-  if (data?.token) localStorage.setItem('token', data.token);
+  if (!data?.token) throw new Error('Token manquant dans la réponse');
+  setToken(data.token);
   return data;
 }
 
 export function logout() {
-  localStorage.removeItem('token');
+  clearToken();
 }
-export function getToken() {
-  return localStorage.getItem('token');
-}
-export function isAuthenticated() {
-  return !!localStorage.getItem('token');
-}
-
-const authService = { login, logout, getToken, isAuthenticated };
-export default authService;

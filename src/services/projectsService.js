@@ -10,13 +10,12 @@ function normalizeTech(value) {
 }
 
 export async function fetchProjects(params = {}) {
-  const url = new URL(`${API}/projects`, window.location.origin);
+  const url = new URL(`${API}/projects`); // ne pas passer window.location.origin
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
   });
 
-  // ⬅️ pas de credentials (cookies non utilisés)
-  const res = await fetch(url);
+  const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`Erreur API ${res.status}`);
 
   const raw = await res.json();
@@ -36,8 +35,8 @@ export async function fetchProjects(params = {}) {
   }));
 }
 
-export async function fetchProject(slug) {
-  const res = await fetch(`${API}/projects/${encodeURIComponent(slug)}`);
+export async function fetchProject(id) {
+  const res = await fetch(`${API}/projects/${encodeURIComponent(id)}`);
   if (!res.ok) throw new Error('Projet introuvable');
   const p = await res.json();
   return { ...p, tech: normalizeTech(p.tech) };

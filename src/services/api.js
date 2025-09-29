@@ -1,16 +1,30 @@
 // src/services/api.js
-// Dev: proxy Vite -> "/api" ; Prod: VITE_API_URL + "/api"
-const isProd = import.meta?.env?.PROD;
-const envBase = (import.meta?.env?.VITE_API_URL || '').trim().replace(/\/+$/, '');
-export const API = isProd && envBase ? `${envBase}/api` : '/api';
+import { getToken } from './authService';
+
+/** Base API (VITE_API_BASE en priorité, Render par défaut) */
+export const API =
+  import.meta.env.VITE_API_BASE || 'https://portfolio-backend-emb9.onrender.com/api';
 
 export function authHeader() {
-  try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  } catch {
-    return {};
-  }
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export default { API, authHeader };
+export async function getJSON(path) {
+  const res = await fetch(`${API}${path}`, { headers: { ...authHeader() } });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+export async function postJSON(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`POST ${path} -> ${res.status} ${t}`);
+  }
+  return res.json();
+}

@@ -3,7 +3,7 @@
 
 .projects {
   padding: 5rem 0;
-  background: var(--bg); /* fond sombre comme Home/Contact */
+  background: var(--bg);
   color: var(--text);
 
   .container {
@@ -15,7 +15,7 @@
   h2,
   h1 {
     margin: 0 0 0.75rem;
-    color: var(--secondary); /* titres bleu clair */
+    color: var(--secondary);
     font-weight: 800;
   }
 
@@ -24,7 +24,7 @@
     font-weight: 600;
   }
 
-  /* Filtres (si utilisés) — style identique aux CTA Home */
+  /* Filtres */
   .filters {
     display: flex;
     flex-wrap: wrap;
@@ -50,7 +50,7 @@
     }
   }
 
-  /* Grille simple (si tu n’utilises pas Masonry) */
+  /* Grille simple */
   .grid {
     display: grid;
     gap: 1.25rem;
@@ -64,15 +64,15 @@
     }
   }
 
-  /* Masonry helpers (utilisés dans ton Projects.jsx) */
+  /* Masonry (si utilisé) */
   .masonry-grid {
     display: flex;
-    margin-left: -1rem; /* gutter compensation */
+    margin-left: -1rem;
     width: auto;
     gap: 3em;
   }
   .masonry-grid_column {
-    padding-left: 1rem; /* gutter */
+    padding-left: 1rem;
     background-clip: padding-box;
 
     > * {
@@ -80,7 +80,7 @@
     }
   }
 
-  /* Carte d’ajout (+) visible si connecté */
+  /* Carte d’ajout */
   .add-card {
     background: #fff;
     color: var(--ink);
@@ -118,5 +118,20 @@
       box-shadow: var(--shadow-e2);
       border-color: var(--primary);
     }
+  }
+}
+
+/* Grille des cartes (ProjectsCard) */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+
+  @include respond-until($breakpoint-lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @include respond-until($breakpoint-sm) {
+    grid-template-columns: 1fr;
   }
 }

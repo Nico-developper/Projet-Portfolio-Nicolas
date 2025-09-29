@@ -2,12 +2,12 @@
 @use '../breakpoints' as *;
 
 .skills .skills__title {
-  margin-top: 48px;
   margin-bottom: 16px;
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 700;
   line-height: 1.2;
   color: var(--secondary);
+  margin-top: 0px;
 }
 
 .skills__grid {

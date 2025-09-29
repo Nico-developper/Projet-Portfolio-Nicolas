@@ -1,13 +1,7 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
-/* Section */
-.skills {
-  margin-top: 32px;
-}
-
 .skills__title {
-  margin-top: 48px;
   margin-bottom: 16px;
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 700;
@@ -36,9 +30,9 @@
   color: var(--ink);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 18px;
+  padding: 10px 15px 5px 15px;
   display: grid;
-  gap: 10px;
+  gap: 5px;
 }
 
 .skills__name {
@@ -85,4 +79,9 @@
 .skills .skills__percent {
   font-weight: 700;
   color: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .skills__progress-bar {
+    transition: none;
+  }
 }

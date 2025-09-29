@@ -10,9 +10,7 @@ $about-image-width: 70%;
   color: var(--text);
   background-color: var(--bg);
 
-  /* Deux couches :
-     1) Dégradé sombre (gauche -> milieu)
-     2) Image à droite (fixe au scroll) */
+  /* Dégradé + image fixe à droite */
   background-image:
     linear-gradient(
       to right,
@@ -23,8 +21,7 @@ $about-image-width: 70%;
       rgba(8, 13, 59, 0.2) 86%,
       transparent 100%
     ),
-    url('@/assets/a-propos.webp'); /* si l'alias @ ne résout pas en SCSS, utilise ../../assets/a-propos.webp */
-
+    url('@/assets/a-propos.webp');
   background-repeat: no-repeat, no-repeat;
   background-position:
     left top,
@@ -32,19 +29,26 @@ $about-image-width: 70%;
   background-size:
     100% 100%,
     $about-image-width auto;
-  background-attachment: scroll, fixed; /* dégradé normal + image FIXE */
+  background-attachment: scroll, fixed;
 
   .container {
     max-width: $max-width;
     margin: 0 auto;
     padding: 0 $gutter;
     position: relative;
-    z-index: 2; /* le texte passe au-dessus du bg */
+    z-index: 2;
+
+    /* Centre les panneaux dans la page */
+    display: grid;
+    gap: clamp(24px, 3vw, 32px);
+    justify-items: center; /* <- centre horizontalement chaque enfant */
+    align-items: start; /* <- garde l’alignement en haut verticalement */
+    padding: 30px 0;
   }
 
-  /* Bloc texte (fond adouci + arrondi) */
-  .about__text {
-    max-width: 680px; /* largeur réduite pour confort visuel */
+  /* === Style commun panneau (À propos + Timeline) === */
+  .about__panel {
+    width: min(850px, 100%); /* largeur max + responsive */
     background: color-mix(in srgb, #ffffff 7%, transparent);
     border: 1px solid var(--border);
     border-radius: 18px;
@@ -52,6 +56,12 @@ $about-image-width: 70%;
     box-shadow: var(--shadow-e1);
     backdrop-filter: blur(2px);
 
+    /* Sécurité : même centrage si .container change plus tard */
+    margin-inline: auto;
+  }
+
+  /* Bloc texte */
+  .about__text {
     h2 {
       font-size: clamp(1.6rem, 2.4vw, 2rem);
       margin: 0 0 1rem;
@@ -61,11 +71,11 @@ $about-image-width: 70%;
 
     .about-content {
       display: grid;
-      gap: 1.2rem; /* un peu plus d’air */
-      line-height: 1.9; /* meilleure lisibilité */
-      text-align: justify; /* alignement justifié */
-      hyphens: auto; /* césure automatique */
-      color: color-mix(in srgb, var(--text) 90%, transparent); /* blanc légèrement adouci */
+      gap: 1.2rem;
+      line-height: 1.9;
+      text-align: justify;
+      hyphens: auto;
+      color: color-mix(in srgb, var(--text) 90%, transparent);
 
       p {
         margin: 0;
@@ -76,20 +86,41 @@ $about-image-width: 70%;
         padding-left: 1.5rem;
         list-style: disc;
       }
-
       li {
         margin: 0.4rem 0;
       }
     }
   }
 
-  /* Mobile : on désactive l'effet fixed (perf/UX) */
+  /* Bloc timeline (même fond via .about__panel) */
+  .about__timeline {
+    h2 {
+      font-size: clamp(1.6rem, 2.4vw, 2rem);
+      margin: 0 0 8px;
+      font-weight: 800;
+      color: var(--secondary);
+    }
+
+    .lead {
+      color: color-mix(in srgb, var(--secondary) 82%, transparent);
+      font-size: clamp(1rem, 1.4vw, 1.05rem);
+      font-weight: 500;
+      line-height: 1.7;
+      margin: 0 0 20px;
+    }
+
+    .timeline {
+      margin-top: 0;
+    }
+  }
+
+  /* Mobile : désactiver l'image fixe pour perf */
   @include respond-until($breakpoint-md) {
     background-image: none;
     background-color: var(--bg);
 
-    .about__text {
-      max-width: 100%;
+    .about__panel {
+      width: 100%;
     }
   }
 }
