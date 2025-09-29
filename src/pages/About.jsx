@@ -2,6 +2,7 @@ import React from 'react';
 import '../styles/pages/About.scss';
 import Seo from '../components/Seo';
 import Timeline from '../components/Timeline';
+import aboutBg from '@/assets/a-propos.webp';
 
 const items = [
   // Formations (gauche)
@@ -33,23 +34,7 @@ const items = [
   },
 
   // Expériences (droite)
-  {
-    side: 'right',
-    date: 'Janv–Avr 2016',
-    title: 'Belambra Club Neige et Ciel, Les Menuires',
-    subtitle: 'CDD 4 mois – Second d’animation',
-    bullets: ['Gestion d’équipes, plannings, budget', 'Encadrement des sports et des soirées'],
-  },
-  {
-    side: 'right',
-    date: 'Saisons 2016–2017',
-    title: 'Belambra Club La Palmyre',
-    subtitle: 'CDD 8 mois – Second d’animation',
-    bullets: [
-      'Management d’équipes, préparation & création d’événements',
-      'Conception de spectacles, scènes, décors, activités',
-    ],
-  },
+
   {
     side: 'right',
     date: 'Sept 2017 – Mars 2018',
@@ -85,7 +70,7 @@ const items = [
 export default function About() {
   return (
     <main>
-      <section className="about">
+      <section className="about" style={{ '--about-bg': `url(${aboutBg})` }}>
         <Seo
           title="À propos & Parcours – Nicolas Développeur"
           description="À propos, parcours, expériences et formations de Nicolas, développeur web."

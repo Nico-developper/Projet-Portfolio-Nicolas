@@ -1,4 +1,7 @@
-/* Design tokens — palette unique et sémantique */
+/* =========================================================
+   DESIGN TOKENS — variables globales (CSS + SCSS)
+   ========================================================= */
+
 :root {
   /* Palette de marque */
   --primary: #131f8a;
@@ -8,25 +11,25 @@
   /* Surfaces & fonds */
   --bg: #080d3b; /* fond principal dark */
   --surface: #ffffff; /* cartes / sections claires */
-  --surface-2: #f7f7fb; /* surface alternative (gris très clair) */
+  --surface-2: #f7f7fb;
 
-  /* Texte */
+  /* Texte (cohérent accessibilité) */
   --text: #ffffff; /* texte sur fond sombre */
-  --ink: #111111; /* texte sur surfaces claires */
-  --muted: #666666; /* texte secondaire */
-  --muted-2: #999999; /* texte tertiaire */
+  --ink: #0f1a3a; /* texte foncé lisible sur fond clair (pas noir pur) */
+  --muted: #3a4a80; /* secondaire sur fond clair */
+  --muted-2: #6a78a8;
 
   /* Bordures, ombres, overlays */
-  --border: color-mix(in srgb, var(--ink) 12%, transparent);
-  --border-strong: color-mix(in srgb, var(--ink) 18%, transparent);
-  --overlay: color-mix(in srgb, var(--ink) 50%, transparent);
+  --border: color-mix(in srgb, var(--ink) 14%, transparent);
+  --border-strong: color-mix(in srgb, var(--ink) 22%, transparent);
+  --overlay: color-mix(in srgb, #000 50%, transparent);
 
-  /* États (si besoin) */
+  /* États */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
 
-  /* Ombres (échelles prêtes à l’emploi) */
+  /* Ombres */
   --shadow-e1: 0 1px 2px color-mix(in srgb, #000 16%, transparent);
   --shadow-e2: 0 4px 16px color-mix(in srgb, #000 18%, transparent);
   --shadow-e3: 0 10px 30px color-mix(in srgb, #000 22%, transparent);
@@ -37,7 +40,7 @@
   --gutter: 1.5rem;
 }
 
-/* Alias Sass pour usage SCSS (optionnels) */
+/* Aliases SCSS pratiques */
 $color-primary: var(--primary);
 $color-secondary: var(--secondary);
 $color-accent: var(--accent);
@@ -57,7 +60,7 @@ $overlay: var(--overlay);
 $max-width: var(--container-max);
 $gutter: var(--gutter);
 
-/* Couleur par défaut de certains modules */
+/* Modules qui utilisent l’accent par défaut (optionnel) */
 .skills,
 .rating-stars,
 .progress-row {

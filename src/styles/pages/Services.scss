@@ -1,26 +1,34 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
+/* Page Services */
 .services-page {
-  margin-top: 5em;
+  margin-top: 8em;
+  color: var(--text);
 }
 
-/* Centrage identique à Home */
 .services-page .container {
   max-width: $max-width;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
+/* Espacement par défaut des sections (hero inclus) */
+.section {
+  margin-block: clamp(64px, 8vw, 120px);
+}
+
+/* Augmente l’espace UNIQUEMENT entre les 4 parties listées */
+.services-page section[aria-labelledby] {
+  margin-block: clamp(112px, 12vw, 180px);
+}
+
 /* HERO */
 .hero {
-  margin-bottom: clamp(16px, 3vw, 24px);
-
   .hero__text {
     display: grid;
     gap: clamp(10px, 2vw, 14px);
   }
-
   h1 {
     font-size: clamp(1.75rem, 3.2vw, 2.25rem);
     font-weight: 700;
@@ -28,28 +36,28 @@
     color: var(--secondary);
     margin: 0;
   }
-
   .lead {
-    color: color-mix(in srgb, var(--secondary) 82%, transparent);
+    color: color-mix(in srgb, var(--text) 86%, transparent);
     font-size: clamp(1rem, 1.4vw, 1.05rem);
     font-weight: 500;
     line-height: 1.7;
     margin: 0;
   }
-
-  .hero__cta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 8px;
-
-    &--center {
-      justify-content: center;
-    }
-  }
 }
 
-/* Boutons style cohérent avec Home */
+/* CTA réutilisable (bouton final centré) */
+.hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 80px;
+  width: 100%;
+}
+.hero__cta--center {
+  justify-content: center;
+}
+
+/* Boutons */
 .btn {
   display: inline-block;
   padding: 0.85rem 1.25rem;
@@ -63,32 +71,25 @@
     background-color 0.2s ease,
     color 0.2s ease,
     transform 0.05s ease;
-
   &:hover {
     background: var(--primary);
     color: #fff;
-  }
-
-  &.btn--ghost {
-    background: transparent;
-    color: var(--primary);
   }
 }
 
 /* Titres de section */
 .section-title {
-  margin: 18px 0 12px;
+  margin: 0 0 22px;
   font-size: clamp(1.25rem, 2.5vw, 1.6rem);
   font-weight: 800;
   color: var(--secondary);
 }
 
-/* Grille de cartes */
+/* Grille des cartes */
 .cards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(12px, 2.4vw, 18px);
-
+  gap: clamp(14px, 2.8vw, 22px);
   @include respond-from($breakpoint-md) {
     grid-template-columns: 1fr 1fr;
   }
@@ -97,13 +98,13 @@
   }
 }
 
-/* Base card : cohérente avec tl-card */
+/* Cartes génériques */
 .card {
   background: var(--surface);
   color: var(--ink);
   border: 3px solid var(--primary);
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 16px 16px 18px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
   opacity: 0;
   transform: translateY(8px);
@@ -113,24 +114,28 @@
   transition-delay: var(--delay, 0ms);
 
   .card__title {
-    margin: 0 0 4px;
-    color: var(--secondary);
+    margin: 0 0 8px;
+    color: var(--primary);
     font-weight: 800;
     font-size: 1rem;
   }
   .card__desc {
-    margin: 0 0 8px;
-    opacity: 0.9;
+    margin: 0 0 10px;
+    color: var(--muted);
   }
   .card__list {
     margin: 0;
     padding-left: 1.1rem;
     display: grid;
-    gap: 4px;
+    gap: 6px;
+  }
+  .card__list li {
+    color: var(--muted);
   }
   .card__note {
-    margin-top: 8px;
+    margin-top: 10px;
     font-style: italic;
+    color: var(--muted);
   }
 }
 
@@ -139,29 +144,59 @@
   transform: translateY(0);
 }
 
-/* Pricing specifics */
-.card--pricing .price {
-  display: inline-block;
-  margin: 4px 0 8px;
-  padding: 4px 10px;
-  border: 2px solid var(--primary);
-  border-radius: 999px;
-  font-weight: 800;
-  color: var(--primary);
-  background: #fff;
+/* Cartes pricing : pastille fluide + espace réservé */
+.card--pricing {
+  --badge: clamp(96px, 10vw, 116px);
+
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+
+  .card__head {
+    position: relative;
+    padding-block: 8px 12px;
+    padding-right: calc(var(--badge) + 26px);
+    border-bottom: 2px dashed color-mix(in srgb, var(--primary) 35%, transparent);
+    display: grid;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge-price {
+    position: absolute;
+    top: 4px;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    inline-size: var(--badge);
+    block-size: var(--badge);
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    background: #fff;
+    color: var(--primary);
+    font-weight: 800;
+    text-align: center;
+    padding: 10px;
+    line-height: 1.1;
+    font-size: clamp(0.74rem, 1.05vw, 0.92rem);
+    word-break: break-word;
+    text-wrap: balance;
+  }
 }
 
+/* Variante highlight */
 .card--pricing.is-highlight {
-  background: color-mix(in srgb, var(--primary) 7%, #fff);
+  background: var(--surface);
   border-color: var(--primary);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 /* Bloc taux */
 .rate {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 14px;
+  margin-top: 10px;
 
   @include respond-from($breakpoint-md) {
     grid-template-columns: 1fr 1fr;
@@ -170,13 +205,14 @@
   .rate__box {
     border: 3px solid var(--primary);
     border-radius: 16px;
-    padding: 14px 16px;
+    padding: 16px;
     text-align: center;
     background: var(--surface);
+    color: var(--ink);
   }
   .rate__label {
     font-weight: 700;
-    color: var(--secondary);
+    color: var(--primary);
     margin-bottom: 6px;
   }
   .rate__value {
@@ -186,18 +222,30 @@
   }
 }
 
-/* Disclaimers */
+/* Disclaimer */
 .disclaimer {
-  margin-top: 8px;
+  margin-top: 12px;
   font-size: 0.95rem;
-  opacity: 0.85;
+  color: color-mix(in srgb, var(--ink) 12%, var(--text));
+  opacity: 0.9;
 }
 
-/* Accessibilité */
+/* Motion safe */
 @media (prefers-reduced-motion: reduce) {
   .card {
     transition: none;
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Ajustements mobiles pour la pastille */
+@media (max-width: 420px) {
+  .card--pricing {
+    --badge: 92px;
+  }
+  .card--pricing .badge-price {
+    font-size: 0.82rem;
+    line-height: 1.12;
   }
 }

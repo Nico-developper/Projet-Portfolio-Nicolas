@@ -1,16 +1,18 @@
 @use '../variables' as *;
 @use '../breakpoints' as *;
 
-/* largeur prise par l'image de fond (droite) */
+/* largeur de l'image de fond à droite */
 $about-image-width: 70%;
 
 .about {
   position: relative;
   padding: 4rem 0;
+
+  /* Sur fond bleu sombre → texte clair par défaut */
   color: var(--text);
   background-color: var(--bg);
 
-  /* Dégradé + image fixe à droite */
+  /* Dégradé + image (2e couche injectée par le JSX via --about-bg) */
   background-image:
     linear-gradient(
       to right,
@@ -21,7 +23,7 @@ $about-image-width: 70%;
       rgba(8, 13, 59, 0.2) 86%,
       transparent 100%
     ),
-    url('@/assets/a-propos.webp');
+    var(--about-bg, none);
   background-repeat: no-repeat, no-repeat;
   background-position:
     left top,
@@ -38,26 +40,25 @@ $about-image-width: 70%;
     position: relative;
     z-index: 2;
 
-    /* Centre les panneaux dans la page */
     display: grid;
     gap: clamp(24px, 3vw, 32px);
-    justify-items: center; /* <- centre horizontalement chaque enfant */
-    align-items: start; /* <- garde l’alignement en haut verticalement */
-    padding: 30px 0;
+    justify-items: center;
+    align-items: start;
+    padding-block: 30px;
   }
 
-  /* === Style commun panneau (À propos + Timeline) === */
+  /* Panneaux sur fond sombre : fond semi-opaque + texte CLAIR */
   .about__panel {
-    width: min(850px, 100%); /* largeur max + responsive */
-    background: color-mix(in srgb, #ffffff 7%, transparent);
+    width: min(850px, 100%);
+    background: color-mix(in srgb, #ffffff 10%, transparent); /* +opaque pour contraste */
     border: 1px solid var(--border);
     border-radius: 18px;
     padding: clamp(16px, 3vw, 24px);
     box-shadow: var(--shadow-e1);
     backdrop-filter: blur(2px);
-
-    /* Sécurité : même centrage si .container change plus tard */
     margin-inline: auto;
+
+    color: var(--text); /* on fige le texte en clair dans les panneaux */
   }
 
   /* Bloc texte */
@@ -75,7 +76,7 @@ $about-image-width: 70%;
       line-height: 1.9;
       text-align: justify;
       hyphens: auto;
-      color: color-mix(in srgb, var(--text) 90%, transparent);
+      color: color-mix(in srgb, var(--text) 92%, transparent);
 
       p {
         margin: 0;
@@ -114,7 +115,7 @@ $about-image-width: 70%;
     }
   }
 
-  /* Mobile : désactiver l'image fixe pour perf */
+  /* Mobile : on coupe l’image fixe pour perfs et éviter le jank */
   @include respond-until($breakpoint-md) {
     background-image: none;
     background-color: var(--bg);
