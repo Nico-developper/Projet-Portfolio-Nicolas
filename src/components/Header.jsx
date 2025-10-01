@@ -13,14 +13,29 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     closeMenu();
-    navigate('/login');
+    navigate('/'); // retour à l'accueil après déconnexion
+  };
+
+  // Accès secret: Ctrl + Alt + clic (Cmd + Alt + clic sur macOS)
+  const handleLogoClick = (e) => {
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+    const isAlt = e.altKey;
+
+    if (isCtrlOrCmd && isAlt) {
+      e.preventDefault(); // empêche la navigation vers "/"
+      closeMenu();
+      navigate('/login');
+    } else {
+      // clic normal: laisser le <Link> gérer la navigation vers "/"
+      closeMenu();
+    }
   };
 
   return (
     <header className="header">
       <div className="container">
         <h1 className="logo">
-          <Link to="/" onClick={closeMenu}>
+          <Link to="/" onClick={handleLogoClick}>
             Nicolas Billière
           </Link>
         </h1>
@@ -42,31 +57,25 @@ export default function Header() {
                 Projets
               </Link>
             </li>
-
             <li>
               <Link to="/services" onClick={closeMenu}>
                 Services et tarifs
               </Link>
             </li>
-
             <li>
               <Link to="/contact" onClick={closeMenu}>
                 Contact
               </Link>
             </li>
-            {isAuthenticated() ? (
+
+            {isAuthenticated() && (
               <li>
                 <button onClick={handleLogout} className="logout-btn">
                   Déconnexion
                 </button>
               </li>
-            ) : (
-              <li>
-                <Link to="/login" onClick={closeMenu}>
-                  Connexion
-                </Link>
-              </li>
             )}
+            {/* Aucun lien "Connexion" visible */}
           </ul>
         </nav>
 

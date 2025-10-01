@@ -90,3 +90,30 @@
     }
   }
 }
+.contact .alert {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+.contact .alert.success {
+  background: #e6ffed;
+  border: 1px solid #b7ebc6;
+}
+.contact .alert.error {
+  background: #ffecec;
+  border: 1px solid #ffb3b3;
+}
+
+.field-error {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: #c1272d;
+}
+
+.honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

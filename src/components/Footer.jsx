@@ -7,13 +7,17 @@ export default function Footer() {
       <div className="container">
         <p>© {new Date().getFullYear()} Nicolas Développeur. Tous droits réservés.</p>
         <div className="footer-links">
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/Nico-developper" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://www.linkedin.com/in/nicolas-billiere-1454b813b/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             LinkedIn
           </a>
-          <a href="mailto:contact@nicolas.dev">Email</a>
+          <a href="mailto:nico.billiere@gmail.com">Email</a>
         </div>
       </div>
     </footer>
